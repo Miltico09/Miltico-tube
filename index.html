@@ -3,82 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#07070c">
+  <link rel="manifest" href="/manifest.json">
   <title>CYBER-DL // MAX QUALITY</title>
   <style>
     * { box-sizing: border-box; }
-    body { background: #07070c; color: #00f0ff; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
-    .hud { background: #0f0f1a; border: 1px solid #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); padding: 22px; border-radius: 8px; width: 100%; max-width: 420px; }
-    h2 { margin: 0 0 15px 0; font-size: 20px; text-align: center; color: #00f0ff; text-shadow: 0 0 8px #00f0ff; letter-spacing: 2px; }
+    body { background: #07070c; color: #00f0ff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 15px; }
+    .hud { background: #0f0f1a; border: 1px solid #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); padding: 20px; border-radius: 8px; width: 100%; max-width: 440px; }
+    h2 { margin: 0 0 15px 0; font-size: 19px; text-align: center; color: #00f0ff; text-shadow: 0 0 8px #00f0ff; letter-spacing: 2px; }
     .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
-    input { flex: 1; padding: 12px; background: #050508; border: 1px solid #ff003c; color: #fff; border-radius: 4px; outline: none; font-family: monospace; font-size: 14px; }
+    input { flex: 1; padding: 12px; background: #050508; border: 1px solid #ff003c; color: #fff; border-radius: 4px; outline: none; font-family: monospace; font-size: 13px; }
     input:focus { border-color: #00ff66; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
     .btn-paste { background: #1a1a2e; border: 1px solid #00f0ff; color: #00f0ff; padding: 0 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .modes { display: flex; gap: 8px; margin-bottom: 14px; }
-    .mode-btn { flex: 1; padding: 8px; background: #050508; border: 1px solid #333; color: #888; border-radius: 4px; cursor: pointer; font-family: monospace; font-weight: bold; }
-    .mode-btn.active { border-color: #00ff66; color: #00ff66; background: rgba(0, 255, 102, 0.08); }
+    .controls { display: flex; gap: 8px; margin-bottom: 12px; }
+    select, .mode-btn { flex: 1; padding: 10px; background: #050508; border: 1px solid #00f0ff; color: #00f0ff; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 12px; outline: none; cursor: pointer; }
+    .mode-btn.active { border-color: #00ff66; color: #00ff66; background: rgba(0, 255, 102, 0.1); }
     .btn-dl { width: 100%; padding: 14px; background: #00f0ff; color: #050508; font-weight: 900; font-size: 15px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
     .btn-dl:active { background: #ff003c; color: #fff; }
-    #status { margin-top: 16px; padding: 12px; background: #050508; border-left: 3px solid #00f0ff; font-size: 13px; color: #00ff66; word-break: break-word; min-height: 44px; display: flex; align-items: center; justify-content: center; text-align: center; }
-    .dl-link { display: inline-block; margin-top: 6px; padding: 10px 16px; background: #ff003c; color: #fff; text-decoration: none; font-weight: bold; border-radius: 4px; box-shadow: 0 0 10px rgba(255, 0, 60, 0.5); }
+    #status { margin-top: 15px; padding: 12px; background: #050508; border-left: 3px solid #00f0ff; font-size: 12px; color: #00ff66; word-break: break-word; text-align: center; }
+    .dl-link { display: inline-block; margin: 6px 4px 0 4px; padding: 10px 14px; background: #ff003c; color: #fff; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 12px; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); cursor: pointer; border: none; font-family: monospace; }
+    .history { margin-top: 16px; border-top: 1px dashed #333; padding-top: 10px; font-size: 11px; }
+    .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #151525; color: #aaa; }
+    .hist-item a { color: #00f0ff; text-decoration: none; font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="hud">
-    <h2>⚡ MAX STREAM DL</h2>
+    <h2>⚡ CYBER-DL // MAX HUD</h2>
+    
     <div class="input-group">
-      <input type="url" id="videoUrl" placeholder="Link de YT, TikTok, FB, Reels..." />
+      <input type="text" id="videoUrl" placeholder="Pega link de YT, TikTok, FB, Reels..." />
       <button class="btn-paste" onclick="pegar()">PEGAR</button>
     </div>
-    <div class="modes">
-      <button class="mode-btn active" id="btnVideo" onclick="setMode('auto')">🎬 VÍDEO MAX (4K/HD)</button>
-      <button class="mode-btn" id="btnAudio" onclick="setMode('audio')">🎵 SOLO AUDIO (MP3)</button>
+
+    <div class="controls">
+      <select id="qualitySelect">
+        <option value="max">🔥 CALIDAD: MAX (4K/1080p)</option>
+        <option value="1080">🎬 CALIDAD: 1080p Full HD</option>
+        <option value="720">⚡ CALIDAD: 720p Rápido</option>
+      </select>
+      <button class="mode-btn" id="btnAudio" onclick="toggleAudio()">🎵 SOLO MP3: OFF</button>
     </div>
-    <button class="btn-dl" onclick="descargar()">EXTRAER ARCHIVO</button>
-    <div id="status">SISTEMA LISTO // ESPERANDO LINK</div>
+
+    <button class="btn-dl" onclick="descargar()">EXTRAER STREAM</button>
+    
+    <div id="status">SISTEMA LISTO // ESPERANDO SEÑAL</div>
+
+    <div class="history" id="histBox" style="display:none;">
+      <div style="color:#ff003c; font-weight:bold; margin-bottom:5px;">ÚLTIMAS EXTRACCIONES:</div>
+      <div id="histList"></div>
+    </div>
   </div>
 
   <script>
-    let currentMode = 'auto';
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
-    function setMode(mode) {
-      currentMode = mode;
-      document.getElementById('btnVideo').classList.toggle('active', mode === 'auto');
-      document.getElementById('btnAudio').classList.toggle('active', mode === 'audio');
+    let isAudio = false;
+
+    function toggleAudio() {
+      isAudio = !isAudio;
+      const btn = document.getElementById('btnAudio');
+      btn.classList.toggle('active', isAudio);
+      btn.innerText = isAudio ? '🎵 SOLO MP3: ON' : '🎵 SOLO MP3: OFF';
+    }
+
+    function limpiarUrl(texto) {
+      const match = (texto || '').match(/https?:\/\/[^\s]+/);
+      return match ? match[0] : texto.trim();
     }
 
     async function pegar() {
       try {
         const text = await navigator.clipboard.readText();
-        document.getElementById('videoUrl').value = text;
+        document.getElementById('videoUrl').value = limpiarUrl(text);
       } catch (e) {
-        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro para pegar';
+        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro para pegar manualmente';
       }
     }
 
-    async function descargar() {
-      const url = document.getElementById('videoUrl').value.trim();
+    async function forzarDescarga(url, filename) {
       const status = document.getElementById('status');
-      if (!url) return status.innerText = '⚠️ ERROR: PEGA UN ENLACE VÁLIDO';
+      try {
+        status.innerText = '⏬ Descargando directo a tu dispositivo...';
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || (isAudio ? 'audio_max.mp3' : 'video_max.mp4');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+        status.innerHTML = `✅ DESCARGA COMPLETADA<br><a class="dl-link" href="${url}" target="_blank">🔗 ABRIR ENLACE DIRECTO</a>`;
+      } catch (e) {
+        // Si el servidor externo bloquea CORS para blob, abre descarga directa
+        window.location.href = url;
+      }
+    }
+
+    function guardarHistorial(origen, urlDescarga) {
+      let hist = JSON.parse(localStorage.getItem('cyber_dl_hist') || '[]');
+      const dominio = new URL(origen).hostname.replace('www.', '');
+      hist.unshift({ dom: dominio, url: urlDescarga, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+      hist = hist.slice(0, 5);
+      localStorage.setItem('cyber_dl_hist', JSON.stringify(hist));
+      renderHistorial();
+    }
+
+    function renderHistorial() {
+      const hist = JSON.parse(localStorage.getItem('cyber_dl_hist') || '[]');
+      const box = document.getElementById('histBox');
+      const list = document.getElementById('histList');
+      if (!hist.length) return;
+      box.style.display = 'block';
+      list.innerHTML = hist.map(h => `
+        <div class="hist-item">
+          <span>[${h.time}] ${h.dom}</span>
+          <a href="${h.url}" target="_blank" download>[BAJAR DE NUEVO]</a>
+        </div>
+      `).join('');
+    }
+
+    async function descargar() {
+      const input = document.getElementById('videoUrl');
+      const cleanUrl = limpiarUrl(input.value);
+      input.value = cleanUrl;
+      const quality = document.getElementById('qualitySelect').value;
+      const status = document.getElementById('status');
+
+      if (!cleanUrl.startsWith('http')) return status.innerText = '⚠️ ERROR: PEGA UN ENLACE VÁLIDO';
 
       status.innerText = '⏳ INTERCEPTANDO STREAM EN MÁXIMA CALIDAD...';
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, mode: currentMode })
+          body: JSON.stringify({ url: cleanUrl, mode: isAudio ? 'audio' : 'auto', quality })
         });
         const data = await res.json();
 
-        if (data.url) {
-          status.innerHTML = `<div>✅ STREAM EXTRAÍDO<br><a class="dl-link" href="${data.url}" target="_blank" download>⬇️ GUARDAR ARCHIVO</a></div>`;
-          window.location.href = data.url;
+        if (data.picker && data.picker.length > 0) {
+          status.innerHTML = '✅ CARRUSEL DETECTADO:<br>' + data.picker.map((item, i) => 
+            `<a class="dl-link" href="${item.url}" target="_blank" download>⬇️ ARCHIVO ${i+1}</a>`
+          ).join('');
+          guardarHistorial(cleanUrl, data.picker[0].url);
+        } else if (data.url) {
+          status.innerHTML = `<div>✅ STREAM LISTO<br><button class="dl-link" onclick="forzarDescarga('${data.url}', '${data.filename || ''}')">⬇️ GUARDAR ARCHIVO</button><a class="dl-link" style="background:#1a1a2e;border:1px solid #00f0ff;" href="${data.url}" target="_blank">🔗 LINK DIRECTO</a></div>`;
+          guardarHistorial(cleanUrl, data.url);
+          forzarDescarga(data.url, data.filename);
         } else {
-          status.innerText = '❌ ' + (data.error || 'No se pudo procesar el enlace');
+          status.innerText = '❌ ' + (data.error || 'No se pudo extraer el vídeo');
         }
       } catch (e) {
         status.innerText = '❌ ERROR DE CONEXIÓN CON EL SERVIDOR';
       }
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderHistorial();
+      const params = new URLSearchParams(window.location.search);
+      const shared = params.get('url') || params.get('text') || params.get('title') || '';
+      const clean = limpiarUrl(shared);
+      if (clean.startsWith('http')) {
+        document.getElementById('videoUrl').value = clean;
+        descargar();
+      }
+    });
   </script>
 </body>
 </html>
