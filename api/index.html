@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CYBER-DL // MAX QUALITY</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #07070c; color: #00f0ff; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
+    .hud { background: #0f0f1a; border: 1px solid #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); padding: 22px; border-radius: 8px; width: 100%; max-width: 420px; }
+    h2 { margin: 0 0 15px 0; font-size: 20px; text-align: center; color: #00f0ff; text-shadow: 0 0 8px #00f0ff; letter-spacing: 2px; }
+    .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+    input { flex: 1; padding: 12px; background: #050508; border: 1px solid #ff003c; color: #fff; border-radius: 4px; outline: none; font-family: monospace; font-size: 14px; }
+    input:focus { border-color: #00ff66; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
+    .btn-paste { background: #1a1a2e; border: 1px solid #00f0ff; color: #00f0ff; padding: 0 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .modes { display: flex; gap: 8px; margin-bottom: 14px; }
+    .mode-btn { flex: 1; padding: 8px; background: #050508; border: 1px solid #333; color: #888; border-radius: 4px; cursor: pointer; font-family: monospace; font-weight: bold; }
+    .mode-btn.active { border-color: #00ff66; color: #00ff66; background: rgba(0, 255, 102, 0.08); }
+    .btn-dl { width: 100%; padding: 14px; background: #00f0ff; color: #050508; font-weight: 900; font-size: 15px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
+    .btn-dl:active { background: #ff003c; color: #fff; }
+    #status { margin-top: 16px; padding: 12px; background: #050508; border-left: 3px solid #00f0ff; font-size: 13px; color: #00ff66; word-break: break-word; min-height: 44px; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .dl-link { display: inline-block; margin-top: 6px; padding: 10px 16px; background: #ff003c; color: #fff; text-decoration: none; font-weight: bold; border-radius: 4px; box-shadow: 0 0 10px rgba(255, 0, 60, 0.5); }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <h2>⚡ MAX STREAM DL</h2>
+    <div class="input-group">
+      <input type="url" id="videoUrl" placeholder="Link de YT, TikTok, FB, Reels..." />
+      <button class="btn-paste" onclick="pegar()">PEGAR</button>
+    </div>
+    <div class="modes">
+      <button class="mode-btn active" id="btnVideo" onclick="setMode('auto')">🎬 VÍDEO MAX (4K/HD)</button>
+      <button class="mode-btn" id="btnAudio" onclick="setMode('audio')">🎵 SOLO AUDIO (MP3)</button>
+    </div>
+    <button class="btn-dl" onclick="descargar()">EXTRAER ARCHIVO</button>
+    <div id="status">SISTEMA LISTO // ESPERANDO LINK</div>
+  </div>
+
+  <script>
+    let currentMode = 'auto';
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnVideo').classList.toggle('active', mode === 'auto');
+      document.getElementById('btnAudio').classList.toggle('active', mode === 'audio');
+    }
+
+    async function pegar() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('videoUrl').value = text;
+      } catch (e) {
+        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro para pegar';
+      }
+    }
+
+    async function descargar() {
+      const url = document.getElementById('videoUrl').value.trim();
+      const status = document.getElementById('status');
+      if (!url) return status.innerText = '⚠️ ERROR: PEGA UN ENLACE VÁLIDO';
+
+      status.innerText = '⏳ INTERCEPTANDO STREAM EN MÁXIMA CALIDAD...';
+      try {
+        const res = await fetch('/api/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, mode: currentMode })
+        });
+        const data = await res.json();
+
+        if (data.url) {
+          status.innerHTML = `<div>✅ STREAM EXTRAÍDO<br><a class="dl-link" href="${data.url}" target="_blank" download>⬇️ GUARDAR ARCHIVO</a></div>`;
+          window.location.href = data.url;
+        } else {
+          status.innerText = '❌ ' + (data.error || 'No se pudo procesar el enlace');
+        }
+      } catch (e) {
+        status.innerText = '❌ ERROR DE CONEXIÓN CON EL SERVIDOR';
+      }
+    }
+  </script>
+</body>
+</html>
