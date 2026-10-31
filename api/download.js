@@ -35,53 +35,36 @@ export default async function handler(req, res) {
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
   // ==========================================
-  // 1. MOTOR YOUTUBE (Cobalt v10 + Endpoints Estables)
+  // 1. MOTOR YOUTUBE (Directo y Confiable)
   // ==========================================
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    const ytNodes = [
-      'https://co.eepy.today/api/json',
-      'https://cobalt-api.kwiatekmiki.com',
-      'https://api.cobalt.tools/api/json'
-    ];
-
-    for (const node of ytNodes) {
-      try {
-        const payload = {
+    try {
+      const ytRes = await fetch('https://co.eepy.today/api/json', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'User-Agent': uaDesktop },
+        body: JSON.stringify({
           url: url,
           videoQuality: String(quality),
           audioFormat: 'mp3',
           filenameStyle: 'pretty',
           downloadMode: mode === 'audio' ? 'audio' : 'auto'
-        };
-
-        const response = await fetch(node, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'User-Agent': uaDesktop
-          },
-          body: JSON.stringify(payload)
+        })
+      });
+      const ytData = await ytRes.json();
+      if (ytData.url) {
+        const title = ytData.filename || 'YouTube_Video';
+        return res.status(200).json({
+          url: ytData.url,
+          title,
+          thumb: '',
+          filename: limpiarNombre(title, ext, qLabel)
         });
-
-        const data = await response.json();
-        if (data.url) {
-          const ytTitle = data.filename || 'YouTube_Video';
-          return res.status(200).json({
-            url: data.url,
-            title: ytTitle,
-            thumb: '',
-            filename: limpiarNombre(ytTitle, ext, qLabel)
-          });
-        }
-      } catch (err) {
-        continue;
       }
-    }
+    } catch (e) {}
   }
 
   // ==========================================
-  // 2. MOTOR TIKTOK
+  // 2. MOTOR TIKTOK (Sin marca de agua)
   // ==========================================
   if (url.includes('tiktok.com')) {
     try {
@@ -112,12 +95,7 @@ export default async function handler(req, res) {
           title: desc,
           thumb: d.cover,
           author: d.author?.nickname || 'TikTok',
-          filename: limpiarNombre(desc, ext, qLabel),
-          formats: [
-            { label: '🔥 MAX HD (Sin Marca)', url: hdUrl, ext: 'mp4' },
-            { label: '⚡ 720p Ligero', url: sdUrl, ext: 'mp4' },
-            { label: '🎵 Audio Original MP3', url: mp3Url, ext: 'mp3' }
-          ].filter(f => f.url)
+          filename: limpiarNombre(desc, ext, qLabel)
         });
       }
     } catch (e) {}
@@ -149,8 +127,7 @@ export default async function handler(req, res) {
             title: rawCaption.slice(0, 90) || `Instagram Reel`,
             thumb: cleanThumb,
             author: 'Instagram',
-            filename: limpiarNombre(rawCaption, ext, qLabel),
-            formats: [{ label: '🔥 MAX HD (Original)', url: cleanVideoUrl, ext: 'mp4' }]
+            filename: limpiarNombre(rawCaption, ext, qLabel)
           });
         }
       }
@@ -178,23 +155,18 @@ export default async function handler(req, res) {
 
       if (bestFbUrl) {
         const fbTitle = titleMatch ? titleMatch[1].replace(/\| Facebook|Facebook/gi, '').trim() : 'Video_de_Facebook';
-        const formats = [];
-        if (hdUrl) formats.push({ label: '🔥 1080p / HD Máximo', url: hdUrl, ext: 'mp4' });
-        if (sdUrl) formats.push({ label: '⚡ 720p / SD Rápido', url: sdUrl, ext: 'mp4' });
-
         return res.status(200).json({
           url: bestFbUrl,
           title: fbTitle,
           author: 'Facebook',
-          filename: limpiarNombre(fbTitle, ext, qLabel),
-          formats
+          filename: limpiarNombre(fbTitle, ext, qLabel)
         });
       }
     } catch (e) {}
   }
 
   // ==========================================
-  // 5. RESPALDO UNIVERSAL
+  // 5. PASARELA UNIVERSAL DE RESPALDO (Para cualquier plataforma)
   // ==========================================
   try {
     const r = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
@@ -204,7 +176,7 @@ export default async function handler(req, res) {
     const dlList = d?.data?.downloads || d?.downloads || [];
     if (dlList.length > 0) {
       const best = dlList.find(x => x.url) || dlList[0];
-      const title = d?.data?.title || d?.title || 'Video';
+      const title = d?.data?.title || d?.title || 'Video_Social';
       return res.status(200).json({
         url: best.url,
         title,
@@ -214,5 +186,5 @@ export default async function handler(req, res) {
     }
   } catch (e) {}
 
-  return res.status(500).json({ error: 'No se pudo procesar el enlace de YouTube o redes sociales.' });
+  return res.status(500).json({ error: 'No se pudo procesar el enlace. Verifica que la publicación sea pública.' });
 }
