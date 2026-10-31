@@ -1,9 +1,9 @@
 {
-  "name": "Cyber-DL Max Quality",
-  "short_name": "CyberDL",
+  "name": "Miltico Tube",
+  "short_name": "MilticoTube",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#07070c",
+  "background_color": "#06060e",
   "theme_color": "#00f0ff",
   "icons": [
     {
