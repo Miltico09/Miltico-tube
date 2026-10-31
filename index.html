@@ -98,7 +98,7 @@
       font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
       padding: 10px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
     }
-    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 10px; }
     .select-wrap, .mode-toggle {
       background: #080912; border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 10px; display: flex; align-items: center; overflow: hidden;
@@ -112,6 +112,14 @@
       padding: 10px 4px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
     }
     .mode-btn.active { background: rgba(255, 0, 85, 0.2); color: #fff; border-bottom: 2px solid var(--red); }
+    
+    .advanced-toggle {
+      font-size: 12px; color: var(--blue); background: transparent; border: none;
+      cursor: pointer; text-align: left; padding: 4px 0; margin-bottom: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    }
+    .cookie-box { display: none; margin-bottom: 10px; background: #05060c; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 8px; }
+    .cookie-box textarea { height: 36px; font-size: 11px; color: #aaa; }
+
     .btn-main {
       width: 100%; padding: 14px; background: linear-gradient(135deg, var(--blue), #00a2ff);
       color: #04050a; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900;
@@ -172,13 +180,18 @@
       <span class="badge" id="b-tt">♪ TIKTOK HD</span>
       <span class="badge" id="b-ig">◈ REELS</span>
       <span class="badge" id="b-fb">f FACEBOOK</span>
-      <span class="badge" id="b-batch">⚡ COLA MULTI-LINK</span>
+      <span class="badge" id="b-batch">⚡ MULTI-LINK</span>
     </div>
 
     <div class="input-box">
-      <textarea id="videoUrl" placeholder="Pega 1 o varios links (FB, IG, TikTok, YT)..." oninput="detectarRed()"></textarea>
+      <textarea id="videoUrl" placeholder="Pega links de FB, IG Reels, TikTok, YT..." oninput="detectarRed()"></textarea>
       <button class="btn-clear" id="btnClear" onclick="limpiarInput()">✕</button>
       <button class="btn-paste" onclick="pegar()">📋 PEGAR</button>
+    </div>
+
+    <button class="advanced-toggle" onclick="toggleCookieBox()">⚙️ [Opcional] Pegar Cookie de sesión para vídeos privados</button>
+    <div class="cookie-box" id="cookieBox">
+      <textarea id="cookieInput" placeholder="Pega tu cookie de IG/FB aquí si el vídeo es privado..."></textarea>
     </div>
 
     <div class="options-grid">
@@ -198,7 +211,7 @@
     <button class="btn-main" onclick="procesarCola()">⚡ EXTRAER Y DESCARGAR</button>
 
     <div class="status-panel" id="status">
-      SISTEMA LISTO // SOPORTA 1 O MÚLTIPLES LINKS
+      SISTEMA LISTO // LISTO PARA REELS Y FACEBOOK
     </div>
 
     <div class="preview-card" id="previewCard">
@@ -227,6 +240,11 @@
       isAudio = audioMode;
       document.getElementById('modeVid').classList.toggle('active', !isAudio);
       document.getElementById('modeAud').classList.toggle('active', isAudio);
+    }
+
+    function toggleCookieBox() {
+      const box = document.getElementById('cookieBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
     }
 
     function extraerTodosLosLinks(texto) {
@@ -273,7 +291,6 @@
       return name;
     }
 
-    // 1. TÚNEL PROXY DIRECTO (Evita que se abra otra pestaña reproduciendo y fuerza guardado con nombre real)
     function descargarViaTunel(url, extOverride) {
       const finalName = obtenerNombreActual(extOverride);
       const status = document.getElementById('status');
@@ -287,12 +304,11 @@
       a.remove();
     }
 
-    // 2. SELECTOR DE CARPETA PERSONALIZADA / ENVIAR A GALERÍA
     async function elegirCarpetaYGuardar(url) {
       const status = document.getElementById('status');
       const finalName = obtenerNombreActual();
       try {
-        status.innerHTML = '<span class="loader"></span> Preparando archivo para elegir carpeta...';
+        status.innerHTML = '<span class="loader"></span> Preparando archivo...';
         const res = await fetch(`/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(finalName)}`);
         const blob = await res.blob();
 
@@ -317,7 +333,6 @@
       }
     }
 
-    // 3. DESCARGAR PORTADA / MINIATURA EN 4K/HD
     function bajarPortada() {
       if (!currentThumb) return;
       const thumbName = obtenerNombreActual('jpg').replace(/_(MAX|1080p|720p|MP3)_/i, '_Portada_HD_');
@@ -330,14 +345,13 @@
       a.remove();
     }
 
-    // 4. PROCESADOR SIMPLE Y DE COLA MULTI-LINKS
     async function procesarCola() {
       const rawText = document.getElementById('videoUrl').value;
       const links = extraerTodosLosLinks(rawText);
       const status = document.getElementById('status');
 
       if (!links.length) {
-        status.innerText = '⚠️ Pega al menos un enlace válido de FB, IG, TikTok o YT';
+        status.innerText = '⚠️ Pega al menos un enlace válido';
         return;
       }
 
@@ -352,17 +366,18 @@
 
     async function extraerUnico(cleanUrl, prefix = '') {
       const quality = document.getElementById('qualitySelect').value;
+      const cookie = document.getElementById('cookieInput').value.trim();
       const status = document.getElementById('status');
       const preview = document.getElementById('previewCard');
       const videoPlayer = document.getElementById('videoPreview');
 
-      status.innerHTML = `<span class="loader"></span> ${prefix}Extrayendo stream y descripción...`;
+      status.innerHTML = `<span class="loader"></span> ${prefix}Analizando Reel / Vídeo...`;
 
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: cleanUrl, mode: isAudio ? 'audio' : 'auto', quality })
+          body: JSON.stringify({ url: cleanUrl, mode: isAudio ? 'audio' : 'auto', quality, cookie })
         });
         const data = await res.json();
 
@@ -374,7 +389,6 @@
           document.getElementById('prevAuthor').innerText = data.author ? `@${data.author}` : 'Stream HD';
           document.getElementById('customFilename').value = data.filename || `Video_HD_${Date.now()}.mp4`;
 
-          // Cargar Vista Previa en el reproductor integrado
           videoPlayer.poster = currentThumb;
           videoPlayer.src = data.url;
 
@@ -397,7 +411,7 @@
           btns.innerHTML = htmlBtns;
           descargarViaTunel(data.url);
         } else {
-          status.innerText = `❌ ${prefix}` + (data.error || 'No se pudo extraer este enlace');
+          status.innerText = `❌ ${prefix}` + (data.error || 'Asegúrate de que la publicación sea pública.');
         }
       } catch (e) {
         status.innerText = `❌ ${prefix}Error de conexión con el servidor`;
