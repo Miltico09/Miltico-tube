@@ -2,16 +2,16 @@ function limpiarNombre(texto, ext = 'mp4', quality = 'HD') {
   const base = (texto || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Quitar tildes
     .replace(/https?:\/\/[^\s]+/g, '')                // Quitar links
-    .replace(/#[a-zA-Z0-9_]+/g, '')                   // Quitar hashtags excesivos
+    .replace(/#[a-zA-Z0-9_]+/g, '')                   // Quitar hashtags
     .replace(/[^a-zA-Z0-9\s_-]/g, '')                 // Solo letras y números
     .trim()
     .split(/\s+/)
-    .slice(0, 7)                                      // Primeras 7 palabras
+    .slice(0, 8)                                      // Primeras 8 palabras de la descripción
     .join('_');
 
-  const tag = Math.floor(100 + Math.random() * 900);  // ID único de 3 dígitos
-  const nombreLimpio = base.length > 2 ? base : `Video_${Date.now().toString().slice(-5)}`;
-  return `MilticoTube_${nombreLimpio}_${quality}_${tag}.${ext}`;
+  const tag = Math.floor(100 + Math.random() * 900);  // Código único para no sobrescribir
+  const nombreLimpio = base.length > 2 ? base : `Video_Extraido`;
+  return `${nombreLimpio}_${quality}_${tag}.${ext}`;
 }
 
 export default async function handler(req, res) {
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
   const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
-  // 0. DESENREDADOR DE LINKS CORTOS (fb.watch, facebook.com/share/r/, vm.tiktok, etc.)
+  // 0. Desenredador de enlaces cortos (fb.watch, share/r/, vm.tiktok)
   try {
     if (url.includes('fb.watch') || url.includes('/share/') || url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com')) {
       const redir = await fetch(url, { method: 'HEAD', redirect: 'follow', headers: { 'User-Agent': uaMobile } });
@@ -34,9 +34,7 @@ export default async function handler(req, res) {
   const ext = mode === 'audio' ? 'mp3' : 'mp4';
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
-  // ==========================================
-  // 1. MOTOR TIKTOK (Con selector HD / SD / MP3 y descripción real)
-  // ==========================================
+  // 1. MOTOR TIKTOK
   if (url.includes('tiktok.com')) {
     try {
       const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
@@ -45,16 +43,17 @@ export default async function handler(req, res) {
       const ttData = await ttRes.json();
       if (ttData.code === 0 && ttData.data) {
         const d = ttData.data;
-        const desc = d.title || d.author?.nickname || 'TikTok';
+        const desc = d.title || d.author?.nickname || 'TikTok_Video';
         const hdUrl = d.hdplay || d.play;
         const sdUrl = d.play || d.wmplay;
         const mp3Url = d.music;
+        const coverHd = d.origin_cover || d.cover;
 
         if (d.images && d.images.length > 0 && mode !== 'audio') {
           return res.status(200).json({
             url: d.images[0],
             title: desc,
-            thumb: d.cover,
+            thumb: coverHd,
             author: d.author?.nickname || 'TikTok',
             filename: limpiarNombre(desc, 'jpg', 'Carrusel'),
             picker: d.images.map(img => ({ url: img }))
@@ -65,7 +64,7 @@ export default async function handler(req, res) {
         return res.status(200).json({
           url: chosenUrl,
           title: desc,
-          thumb: d.cover,
+          thumb: coverHd,
           author: d.author?.nickname || 'TikTok',
           filename: limpiarNombre(desc, ext, qLabel),
           formats: [
@@ -78,11 +77,8 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  // ==========================================
-  // 2. MOTOR NATIVO INSTAGRAM (Reels / Posts) Y FACEBOOK (Watch / Reels / Share)
-  // ==========================================
+  // 2. MOTOR NATIVO INSTAGRAM & FACEBOOK
   if (url.includes('instagram.com') || url.includes('facebook.com') || url.includes('fb.')) {
-    // 2A. Extractor directo Instagram Embed/GraphQL
     if (url.includes('instagram.com')) {
       try {
         const igMatch = url.match(/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
@@ -102,9 +98,9 @@ export default async function handler(req, res) {
             const rawCaption = captionMatch ? captionMatch[1].replace(/<[^>]+>/g, ' ').trim() : `Reel_${shortcode}`;
             return res.status(200).json({
               url: cleanVideoUrl,
-              title: rawCaption.slice(0, 90) || `Instagram Reel ${shortcode}`,
+              title: rawCaption.slice(0, 100) || `Instagram Reel ${shortcode}`,
               thumb: cleanThumb,
-              author: 'Instagram Reel',
+              author: 'Instagram',
               filename: limpiarNombre(rawCaption, ext, qLabel),
               formats: [{ label: '🔥 MAX HD (Original)', url: cleanVideoUrl, ext: 'mp4' }]
             });
@@ -113,7 +109,6 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    // 2B. Extractor directo del código fuente de Facebook (HD y SD reales)
     if (url.includes('facebook.com') || url.includes('fb.')) {
       try {
         const fbRes = await fetch(url, {
@@ -128,14 +123,16 @@ export default async function handler(req, res) {
 
         const hdMatch = html.match(/"browser_native_hd_url":"([^"]+)"/) || html.match(/"playable_url_quality_hd":"([^"]+)"/) || html.match(/hd_src:"([^"]+)"/);
         const sdMatch = html.match(/"browser_native_sd_url":"([^"]+)"/) || html.match(/"playable_url":"([^"]+)"/) || html.match(/sd_src:"([^"]+)"/);
-        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i) || html.match(/property="og:title"\s+content="([^"]+)"/i);
+        const titleMatch = html.match(/property="og:description"\s+content="([^"]+)"/i) || html.match(/property="og:title"\s+content="([^"]+)"/i) || html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const thumbMatch = html.match(/property="og:image"\s+content="([^"]+)"/i);
 
         const hdUrl = hdMatch ? JSON.parse(`"${hdMatch[1]}"`).replace(/\\/g, '') : null;
         const sdUrl = sdMatch ? JSON.parse(`"${sdMatch[1]}"`).replace(/\\/g, '') : null;
         const bestFbUrl = quality === '720' ? (sdUrl || hdUrl) : (hdUrl || sdUrl);
 
         if (bestFbUrl) {
-          const fbTitle = titleMatch ? titleMatch[1].replace(/\| Facebook|Facebook/gi, '').trim() : 'Video de Facebook';
+          const fbTitle = titleMatch ? titleMatch[1].replace(/\| Facebook|Facebook/gi, '').trim() : 'Video_de_Facebook';
+          const fbThumb = thumbMatch ? thumbMatch[1].replace(/&amp;/g, '&') : '';
           const formats = [];
           if (hdUrl) formats.push({ label: '🔥 1080p / HD Máximo', url: hdUrl, ext: 'mp4' });
           if (sdUrl) formats.push({ label: '⚡ 720p / SD Rápido', url: sdUrl, ext: 'mp4' });
@@ -143,7 +140,8 @@ export default async function handler(req, res) {
           return res.status(200).json({
             url: bestFbUrl,
             title: fbTitle,
-            author: 'Facebook Video',
+            thumb: fbThumb,
+            author: 'Facebook',
             filename: limpiarNombre(fbTitle, ext, qLabel),
             formats
           });
@@ -152,12 +150,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // ==========================================
-  // 3. MOTOR YOUTUBE MULTICALIDAD (1080p, 720p, 360p, MP3)
-  // ==========================================
+  // 3. MOTOR YOUTUBE MULTICALIDAD + PORTADA 4K
   const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|shorts\/))([^&?/\s]{11})/);
   if (ytMatch) {
     const videoId = ytMatch[1];
+    const maxThumb = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
     const pipedNodes = [
       'https://pipedapi.kavin.rocks',
       'https://pipedapi.tokhmi.xyz',
@@ -177,11 +174,10 @@ export default async function handler(req, res) {
         const formats = combined.map(s => ({
           label: `🎬 Vídeo ${s.quality || 'HD'} (${s.format || 'MP4'})`,
           url: s.url,
-          ext: 'mp4',
-          res: parseInt(s.quality) || 720
+          ext: 'mp4'
         }));
         if (bestAudio?.url) {
-          formats.push({ label: `🎵 Audio MP3 (${Math.round((bestAudio.bitrate || 128000)/1000)}kbps)`, url: bestAudio.url, ext: 'mp3', res: 0 });
+          formats.push({ label: `🎵 Audio MP3 (${Math.round((bestAudio.bitrate || 128000)/1000)}kbps)`, url: bestAudio.url, ext: 'mp3' });
         }
 
         let selectedUrl = combined[0]?.url || data.videoStreams?.[0]?.url;
@@ -196,7 +192,7 @@ export default async function handler(req, res) {
           return res.status(200).json({
             url: selectedUrl,
             title,
-            thumb: data.thumbnailUrl,
+            thumb: maxThumb || data.thumbnailUrl,
             author: data.uploader || 'YouTube',
             filename: limpiarNombre(title, ext, qLabel),
             formats
@@ -206,9 +202,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // ==========================================
-  // 4. MOTORES UNIVERSALES DE RESPALDO (FB, IG, YT, TikTok)
-  // ==========================================
+  // 4. MOTORES MULTIRRED DE RESPALDO
   const multiApis = [
     `https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`,
     `https://allsocial.vercel.app/api/download?url=${encodeURIComponent(url)}`
@@ -222,9 +216,9 @@ export default async function handler(req, res) {
       if (dlList.length > 0) {
         const valid = dlList.filter(item => item.url);
         if (valid.length > 0) {
-          const title = d?.data?.title || d?.title || 'Video Social HD';
+          const title = d?.data?.title || d?.title || 'Video_Extraido';
           const formats = valid.map((item, idx) => ({
-            label: `${item.quality || item.resolution || item.ext || `Opción ${idx + 1}`}`,
+            label: `${item.quality || item.resolution || item.ext || `Calidad ${idx + 1}`}`,
             url: item.url,
             ext: (item.ext || 'mp4').replace('.', '')
           }));
@@ -236,7 +230,7 @@ export default async function handler(req, res) {
             url: chosen.url,
             title,
             thumb: d?.data?.thumbnail || d?.thumbnail || '',
-            author: d?.data?.source || 'Miltico Engine',
+            author: d?.data?.source || 'Stream HD',
             filename: limpiarNombre(title, ext, qLabel),
             formats
           });
@@ -245,5 +239,5 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  return res.status(500).json({ error: 'No se pudo extraer. Asegúrate de que el Reel o vídeo de Facebook sea Público.' });
+  return res.status(500).json({ error: 'No se pudo extraer. Verifica que el enlace sea público.' });
 }
