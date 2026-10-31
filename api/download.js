@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   let { url, mode = 'auto', quality = 'max', cookie = '' } = req.body;
-  if (!url) return res.status(400).json({ error: 'Falta la URL du vídeo' });
+  if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
 
   const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
   const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
@@ -35,7 +35,53 @@ export default async function handler(req, res) {
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
   // ==========================================
-  // 1. MOTOR TIKTOK (HD sin marca de agua y Carruseles)
+  // 1. MOTOR YOUTUBE (Cobalt v10 + Endpoints Estables)
+  // ==========================================
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const ytNodes = [
+      'https://co.eepy.today/api/json',
+      'https://cobalt-api.kwiatekmiki.com',
+      'https://api.cobalt.tools/api/json'
+    ];
+
+    for (const node of ytNodes) {
+      try {
+        const payload = {
+          url: url,
+          videoQuality: String(quality),
+          audioFormat: 'mp3',
+          filenameStyle: 'pretty',
+          downloadMode: mode === 'audio' ? 'audio' : 'auto'
+        };
+
+        const response = await fetch(node, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': uaDesktop
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.url) {
+          const ytTitle = data.filename || 'YouTube_Video';
+          return res.status(200).json({
+            url: data.url,
+            title: ytTitle,
+            thumb: '',
+            filename: limpiarNombre(ytTitle, ext, qLabel)
+          });
+        }
+      } catch (err) {
+        continue;
+      }
+    }
+  }
+
+  // ==========================================
+  // 2. MOTOR TIKTOK
   // ==========================================
   if (url.includes('tiktok.com')) {
     try {
@@ -78,7 +124,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 2. INSTAGRAM REELS
+  // 3. INSTAGRAM REELS
   // ==========================================
   if (url.includes('instagram.com')) {
     try {
@@ -112,7 +158,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 3. FACEBOOK
+  // 4. FACEBOOK
   // ==========================================
   if (url.includes('facebook.com') || url.includes('fb.')) {
     try {
@@ -148,47 +194,25 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 4. PASARELA GENERAL (YouTube y respaldos)
+  // 5. RESPALDO UNIVERSAL
   // ==========================================
-  const multiApis = [
-    `https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`,
-    `https://co.eepy.today/api/json`
-  ];
+  try {
+    const r = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
+      headers: { 'User-Agent': uaMobile }
+    });
+    const d = await r.json();
+    const dlList = d?.data?.downloads || d?.downloads || [];
+    if (dlList.length > 0) {
+      const best = dlList.find(x => x.url) || dlList[0];
+      const title = d?.data?.title || d?.title || 'Video';
+      return res.status(200).json({
+        url: best.url,
+        title,
+        thumb: d?.data?.thumbnail || d?.thumbnail || '',
+        filename: limpiarNombre(title, ext, qLabel)
+      });
+    }
+  } catch (e) {}
 
-  for (const apiEndpoint of multiApis) {
-    try {
-      const isPost = apiEndpoint.includes('eepy');
-      const options = isPost ? {
-        method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'User-Agent': uaDesktop },
-        body: JSON.stringify({ url, vQuality: 'max', filenamePattern: 'pretty' })
-      } : { headers: { 'User-Agent': uaMobile } };
-
-      const r = await fetch(apiEndpoint, options);
-      const d = await r.json();
-      
-      if (d.url) {
-        return res.status(200).json({
-          url: d.url,
-          title: d.filename || 'Stream_HD',
-          thumb: '',
-          filename: limpiarNombre(d.filename, ext, qLabel)
-        });
-      }
-
-      const dlList = d?.data?.downloads || d?.downloads || [];
-      if (dlList.length > 0) {
-        const best = dlList.find(x => x.url) || dlList[0];
-        const title = d?.data?.title || d?.title || 'Video';
-        return res.status(200).json({
-          url: best.url,
-          title,
-          thumb: d?.data?.thumbnail || d?.thumbnail || '',
-          filename: limpiarNombre(title, ext, qLabel)
-        });
-      }
-    } catch (e) {}
-  }
-
-  return res.status(500).json({ error: 'No se pudo procesar el enlace de TikTok o redes sociales.' });
+  return res.status(500).json({ error: 'No se pudo procesar el enlace de YouTube o redes sociales.' });
 }
