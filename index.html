@@ -3,26 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#030408">
+  <meta name="theme-color" content="#020307">
   <link rel="manifest" href="/manifest.json">
-  <title>MILTICO TUBE // PRO HUD</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>MILTICO TUBE // CYBER HUD v3.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #030408;
-      --card: rgba(12, 14, 26, 0.85);
-      --border: rgba(0, 240, 255, 0.25);
-      --blue: #00f0ff;
+      --bg: #020307;
+      --card: rgba(7, 10, 20, 0.82);
+      --cyan: #00f0ff;
       --pink: #ff0055;
       --green: #00ff88;
-      --text: #e2f8ff;
+      --yellow: #fcee0a;
+      --text: #e6f9ff;
+      --border-cyan: rgba(0, 240, 255, 0.38);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       background-color: var(--bg);
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(255, 0, 85, 0.08) 0%, transparent 40%);
       color: var(--text);
       font-family: 'Rajdhani', sans-serif;
       display: flex;
@@ -32,141 +35,528 @@
       min-height: 100vh;
       margin: 0;
       padding: 16px;
-    }
-    .hud-frame {
-      background: var(--card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 240, 255, 0.03);
-      border-radius: 24px;
-      width: 100%;
-      max-width: 440px;
-      padding: 24px 20px;
+      overflow-x: hidden;
       position: relative;
-      overflow: hidden;
     }
-    .hud-frame::before {
+
+    /* CANVAS DE CÓDIGO CAYENDO EN CASCADA */
+    #cyberCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    /* REJILLA HOLOGRÁFICA Y NEBlinas NEÓN DE FONDO */
+    .cyber-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.14) 0%, transparent 42%),
+        radial-gradient(circle at 85% 80%, rgba(255, 0, 85, 0.14) 0%, transparent 45%),
+        linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    /* LÍNEAS DE ESCANEO CRT */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.28) 3px
+      );
+    }
+
+    /* MARCO PRINCIPAL CYBERPUNK */
+    .hud-frame {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 455px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-cyan);
+      border-radius: 18px;
+      padding: 24px 20px 22px;
+      box-shadow:
+        0 0 35px rgba(0, 240, 255, 0.15),
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        inset 0 0 25px rgba(0, 240, 255, 0.05);
+      overflow: hidden;
+      animation: framePulse 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes framePulse {
+      0% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.12), inset 0 0 18px rgba(0, 240, 255, 0.04); }
+      50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.25), 0 0 15px rgba(255, 0, 85, 0.15), inset 0 0 28px rgba(0, 240, 255, 0.08); }
+      100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 22px rgba(255, 0, 85, 0.06); }
+    }
+
+    /* LÁSER ESCÁNER QUE RECORRE LA TARJETA */
+    .hud-frame::after {
       content: "";
       position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--pink), var(--blue), var(--green));
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
+      box-shadow: 0 0 12px var(--cyan);
+      opacity: 0.65;
+      animation: laserScan 6s linear infinite;
+      pointer-events: none;
     }
+
+    @keyframes laserScan {
+      0% { top: -5%; opacity: 0; }
+      10% { opacity: 0.75; }
+      90% { opacity: 0.75; }
+      100% { top: 105%; opacity: 0; }
+    }
+
+    /* ESQUINAS TÁCTICAS BRILLANTES */
+    .corner {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+      z-index: 12;
+    }
+    .corner.tl { top: 6px; left: 6px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); }
+    .corner.tr { top: 6px; right: 6px; border-top: 2px solid var(--pink); border-right: 2px solid var(--pink); }
+    .corner.bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--pink); border-left: 2px solid var(--pink); }
+    .corner.br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); }
+
+    /* BARRA SUPERIOR DE TELEMETRÍA Y LUCES LED */
+    .telemetry-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: #6b889e;
+      letter-spacing: 1px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
+    }
+
+    .led-cluster {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .led {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .led.cyan { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: blinkFast 1.4s infinite; }
+    .led.pink { background: var(--pink); box-shadow: 0 0 8px var(--pink); animation: blinkSlow 2.2s infinite; }
+    .led.green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blinkFast 0.9s infinite alternate; }
+    .led.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: blinkSlow 3s infinite; }
+
+    @keyframes blinkFast {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.2; transform: scale(0.85); }
+    }
+    @keyframes blinkSlow {
+      0%, 70%, 100% { opacity: 1; }
+      35% { opacity: 0.15; }
+    }
+
+    /* CABECERA PRINCIPAL */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
     }
+
     .brand-group h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 22px;
+      font-size: 23px;
       font-weight: 900;
       margin: 0;
-      letter-spacing: 1.5px;
-      background: linear-gradient(90deg, #fff, var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 2px 0 0 rgba(255, 0, 85, 0.5);
+      animation: neonFlicker 7s infinite;
     }
+
+    @keyframes neonFlicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.75), 2px 0 0 rgba(255, 0, 85, 0.55);
+        opacity: 1;
+      }
+      20%, 24%, 55% {
+        text-shadow: none;
+        opacity: 0.75;
+      }
+    }
+
     .brand-group span {
+      display: block;
+      font-family: 'Share Tech Mono', monospace;
       font-size: 10px;
-      color: #7a8c9e;
-      letter-spacing: 3px;
+      color: var(--cyan);
+      letter-spacing: 2.8px;
       text-transform: uppercase;
-      font-weight: 700;
+      margin-top: 2px;
     }
-    .status-pill {
-      background: rgba(0, 255, 136, 0.08);
-      border: 1px solid rgba(0, 255, 136, 0.35);
-      color: var(--green);
+
+    .session-btn {
+      background: rgba(255, 0, 85, 0.1);
+      border: 1px solid rgba(255, 0, 85, 0.45);
+      color: #ff6699;
+      font-family: 'Orbitron', sans-serif;
       font-size: 10px;
       font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 999px;
-      letter-spacing: 1px;
+      padding: 7px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.8px;
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.2);
+      transition: 0.25s;
     }
+    .session-btn:hover, .session-btn.active {
+      background: rgba(255, 0, 85, 0.22);
+      border-color: var(--pink);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(255, 0, 85, 0.5);
+    }
+
+    .session-panel {
+      display: none;
+      background: rgba(3, 5, 12, 0.92);
+      border: 1px solid rgba(255, 0, 85, 0.4);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+    .session-panel textarea {
+      width: 100%;
+      height: 44px;
+      background: #020306;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 11px;
+      resize: none;
+      outline: none;
+    }
+
+    /* BADGES DE PLATAFORMA */
     .badges-row {
-      display: flex; gap: 6px; margin-bottom: 16px; justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-bottom: 15px;
     }
     .badge {
-      font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #6c7c8c;
-      transition: all 0.2s ease;
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 6px 4px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #5b7083;
+      letter-spacing: 0.8px;
+      transition: all 0.25s ease;
     }
-    .badge.active { border-color: var(--green); color: var(--green); background: rgba(0, 255, 136, 0.1); }
+    .badge.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.12);
+      box-shadow: 0 0 14px rgba(0, 255, 136, 0.35), inset 0 0 8px rgba(0, 255, 136, 0.15);
+      transform: translateY(-1px);
+    }
 
+    /* CAJA DE ENTRADA DE URL */
     .input-wrapper {
-      position: relative; background: #060812; border: 1.5px solid var(--border);
-      border-radius: 14px; padding: 6px; display: flex; align-items: center; margin-bottom: 14px;
-      transition: all 0.3s ease;
+      position: relative;
+      background: rgba(4, 7, 15, 0.9);
+      border: 1.5px solid var(--border-cyan);
+      border-radius: 12px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+      transition: all 0.25s ease;
+      box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.05);
     }
-    .input-wrapper:focus-within { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
-    textarea {
-      flex: 1; background: transparent; border: none; color: #fff;
-      font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
-      padding: 8px; outline: none; resize: none; height: 46px; width: 100%;
+    .input-wrapper:focus-within {
+      border-color: var(--green);
+      box-shadow: 0 0 18px rgba(0, 255, 136, 0.28), inset 0 0 10px rgba(0, 255, 136, 0.08);
+    }
+    textarea#urlInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13.5px;
+      padding: 8px;
+      outline: none;
+      resize: none;
+      height: 46px;
+      width: 100%;
     }
     .btn-paste {
-      background: rgba(0, 240, 255, 0.12); border: 1px solid var(--blue); color: var(--blue);
-      font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
-      padding: 10px 12px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.18), rgba(0, 240, 255, 0.06));
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 11px 13px;
+      border-radius: 9px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+      transition: 0.2s;
     }
-    .controls-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .btn-paste:active {
+      transform: scale(0.95);
+      background: var(--cyan);
+      color: #000;
+    }
+
+    /* SELECTORES DE CALIDAD Y MODO */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
     select, .mode-switcher {
-      background: #060812; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; overflow: hidden; display: flex; align-items: center;
+      background: rgba(4, 7, 15, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.22);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
     }
-    select { width: 100%; background: #060812; color: var(--blue); border: none; padding: 11px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; outline: none; }
-    .mode-tab { flex: 1; background: transparent; border: none; color: #6c7c8c; padding: 11px 4px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
-    .mode-tab.active { background: rgba(255, 0, 85, 0.15); color: #fff; border-bottom: 2px solid var(--pink); }
+    select {
+      width: 100%;
+      color: var(--cyan);
+      padding: 11px 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      outline: none;
+    }
+    .mode-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #6c7c8c;
+      padding: 11px 4px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .mode-tab.active {
+      background: rgba(255, 0, 85, 0.22);
+      color: #fff;
+      border-bottom: 2px solid var(--pink);
+      text-shadow: 0 0 8px var(--pink);
+    }
 
+    /* BOTÓN DE EJECUCIÓN CYBERPUNK */
     .btn-execute {
-      width: 100%; padding: 15px; background: linear-gradient(135deg, var(--blue), #0088ff);
-      color: #030408; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900;
-      border: none; border-radius: 14px; cursor: pointer; letter-spacing: 1.5px;
-      box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3); transition: 0.2s;
+      position: relative;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00f0ff 0%, #0077ff 55%, #ff0055 100%);
+      background-size: 200% 200%;
+      color: #020307;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13.5px;
+      font-weight: 900;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: 1.8px;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.45);
+      animation: gradientShift 4s ease infinite;
+      transition: transform 0.15s;
     }
-    .btn-execute:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-execute:active:not(:disabled) { transform: scale(0.98); background: var(--green); }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .btn-execute:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+    .btn-execute:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
 
+    /* TERMINAL DE ESTADO */
     .status-box {
-      margin-top: 14px; background: #060812; border: 1px solid rgba(255, 255, 255, 0.05);
-      border-left: 3px solid var(--blue); border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; color: #8a9cb0;
+      margin-top: 14px;
+      background: rgba(3, 6, 14, 0.92);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      border-left: 3px solid var(--cyan);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #9cb8d0;
       word-break: break-word;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
     }
+
+    /* TARJETA DE PREVISUALIZACIÓN Y DESCARGA */
     .preview-card {
-      display: none; margin-top: 14px; background: #070914; border: 1px solid rgba(0, 255, 136, 0.3);
-      border-radius: 14px; padding: 12px; text-align: left;
+      display: none;
+      margin-top: 14px;
+      background: rgba(5, 9, 20, 0.94);
+      border: 1px solid rgba(0, 255, 136, 0.45);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: left;
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.15);
     }
-    .video-container { width: 100%; margin-bottom: 10px; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid var(--border); }
-    video { width: 100%; max-height: 220px; display: block; }
+    .video-container {
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border-cyan);
+    }
+    video {
+      width: 100%;
+      max-height: 210px;
+      display: block;
+    }
     .filename-tag {
-      background: #020306; border: 1px dashed rgba(0, 240, 255, 0.3); border-radius: 8px;
-      padding: 6px 10px; margin: 8px 0; font-size: 12px; color: var(--green); font-family: monospace; display: flex; align-items: center; gap: 6px;
+      background: #020306;
+      border: 1px dashed rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 12px;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .filename-tag input { flex: 1; background: transparent; border: none; color: var(--green); font-family: monospace; font-size: 12px; outline: none; }
-    .action-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .filename-tag input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      outline: none;
+    }
+    .action-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 8px;
+    }
     .pro-btn {
-      width: 100%; text-align: center; padding: 12px; background: var(--pink); color: #fff;
-      text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
-      border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+      width: 100%;
+      text-align: center;
+      padding: 13px;
+      background: linear-gradient(90deg, var(--pink), #ff3377);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 9px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(255, 0, 85, 0.45);
     }
-    .pro-btn.alt { background: rgba(0, 240, 255, 0.12); border: 1px solid var(--blue); color: var(--blue); box-shadow: none; }
+    .pro-btn.alt {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      box-shadow: none;
+    }
+
     .spinner {
-      display: inline-block; width: 14px; height: 14px; border: 2px solid var(--blue);
-      border-bottom-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px;
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border: 2px solid var(--cyan);
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
+  <!-- FONDO ANIMADO DE CASCADA DE CÓDIGO CYBERPUNK -->
+  <canvas id="cyberCanvas"></canvas>
+  <div class="cyber-grid"></div>
+  <div class="scanlines"></div>
+
   <div class="hud-frame">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <!-- BARRA DE LUCES LED Y TELEMETRÍA -->
+    <div class="telemetry-strip">
+      <div class="led-cluster">
+        <span class="led green"></span>
+        <span class="led cyan"></span>
+        <span class="led pink"></span>
+        <span class="led yellow"></span>
+        <span style="margin-left:4px; color:#00ff88;">SYS.NET // ONLINE</span>
+      </div>
+      <div id="cyberClock">NODE: VERCEL-EDGE</div>
+    </div>
+
     <div class="top-bar">
       <div class="brand-group">
         <h1>MILTICO TUBE</h1>
-        <span>PRO STREAM ENGINE</span>
+        <span>CYBER STREAM ENGINE v3.0</span>
       </div>
-      <div class="status-pill">ONLINE</div>
+      <button class="session-btn" type="button" id="sessionBtn" onclick="toggleSession()">🔐 SESIÓN META</button>
+    </div>
+
+    <div class="session-panel" id="sessionPanel">
+      <div style="font-size:11px; color:#9cb8d0; margin-bottom:5px;">Cookie de Sesión (Opcional para Reels/Videos privados):</div>
+      <textarea id="cookieInput" placeholder="sessionid=...; c_user=..."></textarea>
     </div>
 
     <div class="badges-row">
@@ -193,7 +583,7 @@
       </div>
     </div>
 
-    <button class="btn-execute" type="button" id="btnExecute" onclick="procesarDescarga()">⚡ PROCESAR ARCHIVO</button>
+    <button class="btn-execute" type="button" id="btnExecute" onclick="procesarDescarga()">⚡ DESCARGAR ARCHIVO</button>
 
     <div class="status-box" id="statusBox">
       SISTEMA EN LÍNEA // ESPERANDO ENLACE
@@ -213,16 +603,84 @@
   </div>
 
   <script>
+    // 1. Purgar cualquier Service Worker antiguo para evitar que se quede pegada la versión anterior
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) reg.unregister();
+      }).catch(() => {});
     }
 
+    // 2. Animación Cyberpunk de Cascada de Código + Destellos de Luz en Canvas
+    (function initCyberRain() {
+      const canvas = document.getElementById('cyberCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height, columns, drops, colors, speeds;
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEF0123456789⚡';
+      const palette = ['#00f0ff', '#00ff88', '#00f0ff', '#ff0055', '#00f0ff'];
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        const fontSize = 14;
+        columns = Math.floor(width / fontSize);
+        drops = Array.from({ length: columns }, () => Math.random() * -50);
+        colors = Array.from({ length: columns }, () => palette[Math.floor(Math.random() * palette.length)]);
+        speeds = Array.from({ length: columns }, () => 0.4 + Math.random() * 0.85);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      function render() {
+        ctx.fillStyle = 'rgba(2, 3, 7, 0.1)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.font = '13px "Share Tech Mono", monospace';
+
+        for (let i = 0; i < columns; i++) {
+          // Algunas columnas se mantienen apagadas para que sea elegante y no sature el fondo
+          if (i % 2 !== 0 && i % 5 !== 0) continue;
+
+          const char = chars[Math.floor(Math.random() * chars.length)];
+          const x = i * 14;
+          const y = drops[i] * 14;
+
+          // Destello brillante en la punta de la cascada
+          if (Math.random() > 0.88) {
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = colors[i];
+          } else {
+            ctx.fillStyle = colors[i];
+            ctx.shadowBlur = 0;
+          }
+
+          ctx.fillText(char, x, y);
+
+          if (y > height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i] += speeds[i];
+        }
+        requestAnimationFrame(render);
+      }
+      render();
+    })();
+
+    // 3. Lógica de la Interfaz
     let isAudio = false;
 
     function setMode(audio) {
       isAudio = audio;
       document.getElementById('tabVid').classList.toggle('active', !isAudio);
       document.getElementById('tabAud').classList.toggle('active', isAudio);
+    }
+
+    function toggleSession() {
+      const p = document.getElementById('sessionPanel');
+      const b = document.getElementById('sessionBtn');
+      const open = p.style.display === 'block';
+      p.style.display = open ? 'none' : 'block';
+      b.classList.toggle('active', !open);
     }
 
     function detectarPlataforma() {
@@ -240,54 +698,32 @@
         document.getElementById('urlInput').value = match ? match[0] : text.trim();
         detectarPlataforma();
       } catch {
-        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro de texto para pegar manualmente';
+        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro para pegar manualmente';
       }
     }
 
-    // Descarga directa desde el navegador para evitar el límite de 4.5 MB de Vercel en /api/stream
-    async function descargarArchivo(url, extOverride) {
-      const status = document.getElementById('statusBox');
+    function descargarTunel(url, ext) {
       let name = document.getElementById('customFilename').value.trim() || 'video.mp4';
-      if (extOverride) {
-        name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + extOverride;
-      }
+      if (ext) name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + ext;
 
-      try {
-        status.innerHTML = '<span class="spinner"></span> Descargando flujo directo al dispositivo...';
-        const response = await fetch(url, { referrerPolicy: 'no-referrer' });
-        if (!response.ok) throw new Error('CORS restringido en origen');
-
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        status.innerText = '✅ ¡Archivo guardado en tu dispositivo!';
-      } catch {
-        // Fallback: abrir el stream directamente en el navegador sin pasar por el proxy Serverless de 4.5 MB
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        status.innerText = '⚡ Flujo abierto directamente para guardar';
-      }
+      // Usa tu endpoint /api/stream si existe o abre descarga directa de respaldo
+      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
+      const a = document.createElement('a');
+      a.href = proxyUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
 
     async function procesarDescarga() {
       const input = document.getElementById('urlInput');
       const url = (input.value || '').match(/https?:\/\/[^\s]+/)?.[0] || '';
       const quality = document.getElementById('qualitySelect').value;
+      const cookie = document.getElementById('cookieInput').value.trim();
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('previewCard');
-      const btnExecute = document.getElementById('btnExecute');
+      const btn = document.getElementById('btnExecute');
 
       if (!url) {
         status.innerText = '⚠️ Pega un enlace válido primero';
@@ -295,11 +731,8 @@
       }
 
       preview.style.display = 'none';
-      btnExecute.disabled = true;
-      status.innerHTML = '<span class="spinner"></span> Procesando enlace...';
-
-      const controller = new AbortController();
-      const clientTimeout = setTimeout(() => controller.abort(), 12000);
+      btn.disabled = true;
+      status.innerHTML = '<span class="spinner"></span> Extrayendo flujo en alta definición...';
 
       try {
         const res = await fetch('/api/download', {
@@ -308,11 +741,38 @@
           body: JSON.stringify({
             url,
             mode: isAudio ? 'audio' : 'auto',
-            quality
-          }),
-          signal: controller.signal
+            quality,
+            cookie
+          })
         });
 
-        const contentType = res.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          status.inner
+        const data = await res.json();
+
+        if (res.ok && data.url) {
+          status.innerText = '✅ ¡Stream extraído con éxito!';
+          preview.style.display = 'block';
+          document.getElementById('videoTitle').innerText = data.title || 'Vídeo Extraído';
+          document.getElementById('customFilename').value = data.filename || 'video.mp4';
+          document.getElementById('videoPreview').src = data.url;
+
+          const actionContainer = document.getElementById('actionButtons');
+          actionContainer.innerHTML = '';
+
+          const mainBtn = document.createElement('button');
+          mainBtn.type = 'button';
+          mainBtn.className = 'pro-btn';
+          mainBtn.textContent = '⬇ GUARDAR EN EL TELÉFONO';
+          mainBtn.addEventListener('click', () => descargarTunel(data.url));
+          actionContainer.appendChild(mainBtn);
+
+          const directBtn = document.createElement('a');
+          directBtn.href = data.url;
+          directBtn.target = '_blank';
+          directBtn.rel = 'noopener noreferrer';
+          directBtn.className = 'pro-btn alt';
+          directBtn.textContent = '⚡ ABRIR STREAM DIRECTO (SI EL ARCHIVO ES GRANDE)';
+          actionContainer.appendChild(directBtn);
+
+          descargarTunel(data.url);
+        } else {
+          status.
