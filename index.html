@@ -10,7 +10,7 @@
   <style>
     :root {
       --bg: #06060e;
-      --card: rgba(14, 15, 28, 0.92);
+      --card: rgba(14, 15, 28, 0.94);
       --blue: #00f0ff;
       --red: #ff0055;
       --green: #00ff88;
@@ -42,8 +42,8 @@
       box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 240, 255, 0.12);
       border-radius: 18px;
       width: 100%;
-      max-width: 450px;
-      padding: 22px 18px;
+      max-width: 460px;
+      padding: 20px 16px;
       position: relative;
       overflow: hidden;
     }
@@ -53,7 +53,7 @@
       top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
     }
-    .header { text-align: center; margin-bottom: 14px; }
+    .header { text-align: center; margin-bottom: 12px; }
     .brand {
       font-family: 'Orbitron', sans-serif;
       font-size: 25px;
@@ -65,14 +65,14 @@
       -webkit-text-fill-color: transparent;
     }
     .subtitle {
-      font-size: 12px;
+      font-size: 11px;
       color: #8a99ad;
       letter-spacing: 2.5px;
       text-transform: uppercase;
       margin-top: 3px;
       font-weight: 600;
     }
-    .badges { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .badges { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
     .badge {
       font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
       background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -85,20 +85,20 @@
     .input-box {
       display: flex; align-items: center; background: #080912;
       border: 1.5px solid rgba(0, 240, 255, 0.4); border-radius: 12px;
-      padding: 4px; margin-bottom: 12px;
+      padding: 6px; margin-bottom: 10px; gap: 6px;
     }
-    input {
+    textarea {
       flex: 1; background: transparent; border: none; color: #fff;
       font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
-      padding: 11px 10px; outline: none; width: 100%;
+      padding: 6px 8px; outline: none; width: 100%; resize: none; height: 42px;
     }
-    .btn-clear { background: transparent; border: none; color: var(--red); font-size: 18px; font-weight: bold; padding: 0 8px; cursor: pointer; display: none; }
+    .btn-clear { background: transparent; border: none; color: var(--red); font-size: 18px; font-weight: bold; padding: 0 6px; cursor: pointer; display: none; }
     .btn-paste {
       background: rgba(0, 240, 255, 0.15); border: 1px solid var(--blue); color: var(--blue);
       font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
       padding: 10px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
     }
-    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 12px; }
     .select-wrap, .mode-toggle {
       background: #080912; border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 10px; display: flex; align-items: center; overflow: hidden;
@@ -119,27 +119,33 @@
       box-shadow: 0 5px 20px rgba(0, 240, 255, 0.35);
     }
     .status-panel {
-      margin-top: 14px; background: rgba(6, 7, 15, 0.9);
+      margin-top: 12px; background: rgba(6, 7, 15, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid var(--blue);
-      border-radius: 10px; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #a0b2c6;
+      border-radius: 10px; padding: 11px; text-align: center; font-size: 13px; font-weight: 600; color: #a0b2c6;
     }
     .preview-card {
       display: none; margin-top: 14px; background: #0a0b16;
       border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 12px; padding: 12px; text-align: left;
     }
-    .preview-top { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-    .preview-thumb { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--blue); }
-    .preview-info { flex: 1; overflow: hidden; }
-    .preview-title { font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .filename-box {
-      background: #05060c; border: 1px dashed rgba(0, 240, 255, 0.35);
-      border-radius: 8px; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: var(--green);
-      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    .video-player-box {
+      width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.3); background: #000;
     }
-    .filename-box input { padding: 2px; font-size: 12px; color: var(--green); font-family: monospace; }
+    video { width: 100%; max-height: 220px; display: block; }
+    .preview-title { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 4px 0; }
+    .filename-box {
+      background: #05060c; border: 1px dashed rgba(0, 240, 255, 0.4);
+      border-radius: 8px; padding: 6px 10px; margin: 8px 0; font-size: 12px; color: var(--green);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .filename-box input {
+      flex: 1; background: transparent; border: none; color: var(--green);
+      font-family: monospace; font-size: 12px; outline: none;
+    }
     .formats-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .dl-btn {
-      width: 100%; text-align: center; padding: 11px 12px; background: var(--red); color: #fff;
+      width: 100%; text-align: center; padding: 11px 10px; background: var(--red); color: #fff;
       text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
       border-radius: 8px; border: none; cursor: pointer; display: block;
     }
@@ -158,7 +164,7 @@
   <div class="hud-card">
     <div class="header">
       <h1 class="brand">MILTICO TUBE</h1>
-      <div class="subtitle">Multi-Quality Stream Extractor</div>
+      <div class="subtitle">Multi-Link & Proxy Stream HUD</div>
     </div>
 
     <div class="badges">
@@ -166,10 +172,11 @@
       <span class="badge" id="b-tt">♪ TIKTOK HD</span>
       <span class="badge" id="b-ig">◈ REELS</span>
       <span class="badge" id="b-fb">f FACEBOOK</span>
+      <span class="badge" id="b-batch">⚡ COLA MULTI-LINK</span>
     </div>
 
     <div class="input-box">
-      <input type="text" id="videoUrl" placeholder="Pega link de FB, IG Reel, TikTok, YT..." oninput="detectarRed()" />
+      <textarea id="videoUrl" placeholder="Pega 1 o varios links (FB, IG, TikTok, YT)..." oninput="detectarRed()"></textarea>
       <button class="btn-clear" id="btnClear" onclick="limpiarInput()">✕</button>
       <button class="btn-paste" onclick="pegar()">📋 PEGAR</button>
     </div>
@@ -188,24 +195,23 @@
       </div>
     </div>
 
-    <button class="btn-main" onclick="descargar()">⚡ ANALIZAR Y DESCARGAR</button>
+    <button class="btn-main" onclick="procesarCola()">⚡ EXTRAER Y DESCARGAR</button>
 
     <div class="status-panel" id="status">
-      CARPETA PREFIJO: /Descargas/MilticoTube_...
+      SISTEMA LISTO // SOPORTA 1 O MÚLTIPLES LINKS
     </div>
 
     <div class="preview-card" id="previewCard">
-      <div class="preview-top">
-        <img id="prevThumb" class="preview-thumb" src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="thumb" />
-        <div class="preview-info">
-          <p class="preview-title" id="prevTitle">Descripción del vídeo</p>
-          <div style="font-size:11px; color:var(--blue);" id="prevAuthor">@MilticoTube</div>
-        </div>
+      <div class="video-player-box" id="playerBox">
+        <video id="videoPreview" controls playsinline poster=""></video>
       </div>
 
+      <p class="preview-title" id="prevTitle">Descripción del vídeo</p>
+      <div style="font-size:11px; color:var(--blue); margin-bottom:6px;" id="prevAuthor">@Autor</div>
+
       <div class="filename-box">
-        <span>📄</span>
-        <input type="text" id="customFilename" title="Puedes editar el nombre antes de guardar" />
+        <span>✏️</span>
+        <input type="text" id="customFilename" title="Nombre basado en la descripción (editable)" />
       </div>
 
       <div class="formats-list" id="actionBtns"></div>
@@ -215,7 +221,7 @@
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
     let isAudio = false;
-    let lastStreamUrl = '';
+    let currentThumb = '';
 
     function setMode(audioMode) {
       isAudio = audioMode;
@@ -223,114 +229,134 @@
       document.getElementById('modeAud').classList.toggle('active', isAudio);
     }
 
-    function limpiarUrl(texto) {
-      const match = (texto || '').match(/https?:\/\/[^\s]+/);
-      return match ? match[0] : texto.trim();
+    function extraerTodosLosLinks(texto) {
+      const matches = (texto || '').match(/https?:\/\/[^\s]+/g);
+      return matches ? matches : [];
     }
 
     function detectarRed() {
       const val = document.getElementById('videoUrl').value.toLowerCase();
+      const links = extraerTodosLosLinks(val);
       document.getElementById('btnClear').style.display = val.length > 0 ? 'block' : 'none';
       document.getElementById('b-yt').classList.toggle('active', val.includes('youtu'));
       document.getElementById('b-tt').classList.toggle('active', val.includes('tiktok'));
       document.getElementById('b-ig').classList.toggle('active', val.includes('instagram'));
       document.getElementById('b-fb').classList.toggle('active', val.includes('facebook') || val.includes('fb.'));
+      document.getElementById('b-batch').classList.toggle('active', links.length > 1);
     }
 
     function limpiarInput() {
       document.getElementById('videoUrl').value = '';
       detectarRed();
+      const v = document.getElementById('videoPreview');
+      v.pause(); v.src = '';
       document.getElementById('previewCard').style.display = 'none';
-      document.getElementById('status').innerText = 'LISTO PARA NUEVA EXTRACCIÓN';
+      document.getElementById('status').innerText = 'COLA LIMPIA // ESPERANDO ENLACES';
     }
 
     async function pegar() {
       try {
         const text = await navigator.clipboard.readText();
-        document.getElementById('videoUrl').value = limpiarUrl(text);
+        const actual = document.getElementById('videoUrl').value.trim();
+        document.getElementById('videoUrl').value = actual ? (actual + '\n' + text) : text;
         detectarRed();
       } catch (e) {
         document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro y toca Pegar';
       }
     }
 
-    function obtenerNombreActual() {
-      return document.getElementById('customFilename').value.trim() || `MilticoTube_${Date.now()}.mp4`;
+    function obtenerNombreActual(extOverride) {
+      let name = document.getElementById('customFilename').value.trim() || `Video_${Date.now()}.mp4`;
+      if (extOverride) {
+        name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + extOverride;
+      }
+      return name;
     }
 
-    async function forzarDescarga(url, customExt) {
+    // 1. TÚNEL PROXY DIRECTO (Evita que se abra otra pestaña reproduciendo y fuerza guardado con nombre real)
+    function descargarViaTunel(url, extOverride) {
+      const finalName = obtenerNombreActual(extOverride);
       const status = document.getElementById('status');
-      let finalName = obtenerNombreActual();
-      if (customExt && !finalName.endsWith(customExt)) {
-        finalName = finalName.replace(/\.[a-z0-9]+$/i, '') + '.' + customExt;
-      }
-
-      try {
-        status.innerHTML = `<span class="loader"></span> Descargando <b>${finalName}</b>...`;
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = finalName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(blobUrl);
-        status.innerHTML = `✅ Guardado como: <b>${finalName}</b>`;
-      } catch (e) {
-        status.innerHTML = '✅ Abriendo descarga directa del servidor...';
-        window.open(url, '_blank');
-      }
+      status.innerHTML = `⏬ Guardando directo: <b>${finalName}</b>`;
+      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(finalName)}`;
+      const a = document.createElement('a');
+      a.href = proxyUrl;
+      a.download = finalName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
 
+    // 2. SELECTOR DE CARPETA PERSONALIZADA / ENVIAR A GALERÍA
     async function elegirCarpetaYGuardar(url) {
       const status = document.getElementById('status');
       const finalName = obtenerNombreActual();
       try {
-        status.innerHTML = '<span class="loader"></span> Preparando archivo para carpeta MilticoTube...';
-        const res = await fetch(url);
+        status.innerHTML = '<span class="loader"></span> Preparando archivo para elegir carpeta...';
+        const res = await fetch(`/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(finalName)}`);
         const blob = await res.blob();
 
-        // Si el navegador soporta selector nativo de carpetas o menú Guardar En de Android
         if (window.showSaveFilePicker) {
           const handle = await window.showSaveFilePicker({ suggestedName: finalName });
           const writable = await handle.createWritable();
           await writable.write(blob);
           await writable.close();
-          status.innerHTML = `✅ Guardado en tu carpeta elegida: <b>${finalName}</b>`;
+          status.innerHTML = `✅ Guardado en tu carpeta: <b>${finalName}</b>`;
           return;
         }
 
         const file = new File([blob], finalName, { type: blob.type || 'video/mp4' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: finalName });
-          status.innerHTML = `✅ Archivo enviado a tu gestor de carpetas/galería`;
+          status.innerHTML = `✅ Enviado a tu gestor de archivos`;
           return;
         }
-        forzarDescarga(url);
+        descargarViaTunel(url);
       } catch (e) {
-        forzarDescarga(url);
+        descargarViaTunel(url);
       }
     }
 
-    async function descargar() {
-      const input = document.getElementById('videoUrl');
-      const cleanUrl = limpiarUrl(input.value);
-      input.value = cleanUrl;
-      detectarRed();
+    // 3. DESCARGAR PORTADA / MINIATURA EN 4K/HD
+    function bajarPortada() {
+      if (!currentThumb) return;
+      const thumbName = obtenerNombreActual('jpg').replace(/_(MAX|1080p|720p|MP3)_/i, '_Portada_HD_');
+      const proxyUrl = `/api/stream?url=${encodeURIComponent(currentThumb)}&name=${encodeURIComponent(thumbName)}`;
+      const a = document.createElement('a');
+      a.href = proxyUrl;
+      a.download = thumbName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
 
-      const quality = document.getElementById('qualitySelect').value;
+    // 4. PROCESADOR SIMPLE Y DE COLA MULTI-LINKS
+    async function procesarCola() {
+      const rawText = document.getElementById('videoUrl').value;
+      const links = extraerTodosLosLinks(rawText);
       const status = document.getElementById('status');
-      const preview = document.getElementById('previewCard');
 
-      if (!cleanUrl.startsWith('http')) {
-        status.innerText = '⚠️ Pega un enlace válido de FB, IG, TikTok o YT';
+      if (!links.length) {
+        status.innerText = '⚠️ Pega al menos un enlace válido de FB, IG, TikTok o YT';
         return;
       }
 
-      preview.style.display = 'none';
-      status.innerHTML = '<span class="loader"></span> Desencriptando enlace y calidades...';
+      for (let i = 0; i < links.length; i++) {
+        const prefix = links.length > 1 ? `[Cola ${i + 1}/${links.length}] ` : '';
+        await extraerUnico(links[i], prefix);
+        if (links.length > 1 && i < links.length - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
+    }
+
+    async function extraerUnico(cleanUrl, prefix = '') {
+      const quality = document.getElementById('qualitySelect').value;
+      const status = document.getElementById('status');
+      const preview = document.getElementById('previewCard');
+      const videoPlayer = document.getElementById('videoPreview');
+
+      status.innerHTML = `<span class="loader"></span> ${prefix}Extrayendo stream y descripción...`;
 
       try {
         const res = await fetch('/api/download', {
@@ -341,46 +367,51 @@
         const data = await res.json();
 
         if (data.url) {
-          lastStreamUrl = data.url;
-          status.innerText = '✅ ¡Calidades y nombre generados!';
+          currentThumb = data.thumb || '';
+          status.innerText = `✅ ${prefix}¡Listo! Descargando: ${data.filename}`;
           preview.style.display = 'block';
-          document.getElementById('prevTitle').innerText = data.title || 'Vídeo listo';
-          document.getElementById('prevAuthor').innerText = data.author || 'Miltico Tube';
-          document.getElementById('prevThumb').src = data.thumb || 'https://cdn-icons-png.flaticon.com/512/724/724933.png';
-          document.getElementById('customFilename').value = data.filename || `MilticoTube_Video_${Date.now()}.mp4`;
+          document.getElementById('prevTitle').innerText = data.title || 'Vídeo Extraído';
+          document.getElementById('prevAuthor').innerText = data.author ? `@${data.author}` : 'Stream HD';
+          document.getElementById('customFilename').value = data.filename || `Video_HD_${Date.now()}.mp4`;
+
+          // Cargar Vista Previa en el reproductor integrado
+          videoPlayer.poster = currentThumb;
+          videoPlayer.src = data.url;
 
           const btns = document.getElementById('actionBtns');
           let htmlBtns = `
-            <button class="dl-btn" onclick="forzarDescarga('${data.url}')">⬇ DESCARGA RÁPIDA (${quality.toUpperCase()})</button>
-            <button class="dl-btn folder" onclick="elegirCarpetaYGuardar('${data.url}')">📁 ELEGIR CARPETA / ENVIAR A GALERÍA</button>
+            <button class="dl-btn" onclick="descargarViaTunel('${data.url}')">⬇ DESCARGAR ARCHIVO (${quality.toUpperCase()})</button>
+            <div class="grid-2">
+              <button class="dl-btn folder" onclick="elegirCarpetaYGuardar('${data.url}')">📁 ELEGIR CARPETA</button>
+              ${currentThumb ? `<button class="dl-btn alt" onclick="bajarPortada()">🖼️ PORTADA HD</button>` : ''}
+            </div>
           `;
 
           if (data.formats && data.formats.length > 1) {
-            htmlBtns += `<div style="font-size:11px; color:#8a99ad; margin-top:6px;">OTRAS CALIDADES DISPONIBLES:</div>`;
+            htmlBtns += `<div style="font-size:11px; color:#8a99ad; margin-top:6px;">CAMBIAR CALIDAD / FORMATO:</div>`;
             data.formats.forEach(f => {
-              htmlBtns += `<button class="dl-btn alt" onclick="forzarDescarga('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
+              htmlBtns += `<button class="dl-btn alt" onclick="descargarViaTunel('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
             });
           }
 
           btns.innerHTML = htmlBtns;
-          // Autodescarga inmediata con el nombre basado en la descripción
-          forzarDescarga(data.url);
+          descargarViaTunel(data.url);
         } else {
-          status.innerText = '❌ ' + (data.error || 'No se pudo extraer este enlace');
+          status.innerText = `❌ ${prefix}` + (data.error || 'No se pudo extraer este enlace');
         }
       } catch (e) {
-        status.innerText = '❌ Error de conexión con el servidor';
+        status.innerText = `❌ ${prefix}Error de conexión con el servidor`;
       }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const shared = params.get('url') || params.get('text') || params.get('title') || '';
-      const clean = limpiarUrl(shared);
-      if (clean.startsWith('http')) {
-        document.getElementById('videoUrl').value = clean;
+      const links = extraerTodosLosLinks(shared);
+      if (links.length > 0) {
+        document.getElementById('videoUrl').value = links.join('\n');
         detectarRed();
-        descargar();
+        procesarCola();
       }
     });
   </script>
