@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   let { url, mode = 'auto', quality = 'max', cookie = '' } = req.body;
-  if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
+  if (!url) return res.status(400).json({ error: 'Falta la URL du vídeo' });
 
   const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
   const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
@@ -34,7 +34,52 @@ export default async function handler(req, res) {
   const ext = mode === 'audio' ? 'mp3' : 'mp4';
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
-  // 1. INSTAGRAM REELS (Usa Cookie de sesión si el usuario la ingresó)
+  // ==========================================
+  // 1. MOTOR TIKTOK (HD sin marca de agua y Carruseles)
+  // ==========================================
+  if (url.includes('tiktok.com')) {
+    try {
+      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
+        headers: { 'User-Agent': uaMobile }
+      });
+      const ttData = await ttRes.json();
+      if (ttData.code === 0 && ttData.data) {
+        const d = ttData.data;
+        const desc = d.title || d.author?.nickname || 'TikTok_Video';
+        const hdUrl = d.hdplay || d.play;
+        const sdUrl = d.play || d.wmplay;
+        const mp3Url = d.music;
+
+        if (d.images && d.images.length > 0 && mode !== 'audio') {
+          return res.status(200).json({
+            url: d.images[0],
+            title: desc,
+            thumb: d.cover,
+            author: d.author?.nickname || 'TikTok',
+            filename: limpiarNombre(desc, 'jpg', 'Carrusel')
+          });
+        }
+
+        const chosenUrl = mode === 'audio' ? mp3Url : (quality === '720' ? sdUrl : hdUrl);
+        return res.status(200).json({
+          url: chosenUrl,
+          title: desc,
+          thumb: d.cover,
+          author: d.author?.nickname || 'TikTok',
+          filename: limpiarNombre(desc, ext, qLabel),
+          formats: [
+            { label: '🔥 MAX HD (Sin Marca)', url: hdUrl, ext: 'mp4' },
+            { label: '⚡ 720p Ligero', url: sdUrl, ext: 'mp4' },
+            { label: '🎵 Audio Original MP3', url: mp3Url, ext: 'mp3' }
+          ].filter(f => f.url)
+        });
+      }
+    } catch (e) {}
+  }
+
+  // ==========================================
+  // 2. INSTAGRAM REELS
+  // ==========================================
   if (url.includes('instagram.com')) {
     try {
       const igMatch = url.match(/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
@@ -66,7 +111,9 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  // 2. FACEBOOK (Usa Cookie de sesión opcional para saltar bloqueos)
+  // ==========================================
+  // 3. FACEBOOK
+  // ==========================================
   if (url.includes('facebook.com') || url.includes('fb.')) {
     try {
       const headers = { 'User-Agent': uaDesktop, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
@@ -100,7 +147,9 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  // 3. PASARELA GENERAL (TikTok, YouTube y respaldos sociales)
+  // ==========================================
+  // 4. PASARELA GENERAL (YouTube y respaldos)
+  // ==========================================
   const multiApis = [
     `https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`,
     `https://co.eepy.today/api/json`
@@ -141,5 +190,5 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  return res.status(500).json({ error: 'No se pudo procesar. Si el Reel o vídeo es privado, despliega el panel de sesión superior.' });
+  return res.status(500).json({ error: 'No se pudo procesar el enlace de TikTok o redes sociales.' });
 }
