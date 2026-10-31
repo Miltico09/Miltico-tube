@@ -3,54 +3,398 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#07070c">
+  <meta name="theme-color" content="#06060e">
   <link rel="manifest" href="/manifest.json">
-  <title>CYBER-DL // MAX QUALITY</title>
+  <title>MILTICO TUBE // MAX HUD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
-    body { background: #07070c; color: #00f0ff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 15px; }
-    .hud { background: #0f0f1a; border: 1px solid #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); padding: 20px; border-radius: 8px; width: 100%; max-width: 440px; }
-    h2 { margin: 0 0 15px 0; font-size: 19px; text-align: center; color: #00f0ff; text-shadow: 0 0 8px #00f0ff; letter-spacing: 2px; }
-    .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
-    input { flex: 1; padding: 12px; background: #050508; border: 1px solid #ff003c; color: #fff; border-radius: 4px; outline: none; font-family: monospace; font-size: 13px; }
-    input:focus { border-color: #00ff66; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
-    .btn-paste { background: #1a1a2e; border: 1px solid #00f0ff; color: #00f0ff; padding: 0 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .controls { display: flex; gap: 8px; margin-bottom: 12px; }
-    select, .mode-btn { flex: 1; padding: 10px; background: #050508; border: 1px solid #00f0ff; color: #00f0ff; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 12px; outline: none; cursor: pointer; }
-    .mode-btn.active { border-color: #00ff66; color: #00ff66; background: rgba(0, 255, 102, 0.1); }
-    .btn-dl { width: 100%; padding: 14px; background: #00f0ff; color: #050508; font-weight: 900; font-size: 15px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
-    .btn-dl:active { background: #ff003c; color: #fff; }
-    #status { margin-top: 15px; padding: 12px; background: #050508; border-left: 3px solid #00f0ff; font-size: 12px; color: #00ff66; word-break: break-word; text-align: center; }
-    .dl-link { display: inline-block; margin: 6px 4px 0 4px; padding: 10px 14px; background: #ff003c; color: #fff; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 12px; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); cursor: pointer; border: none; font-family: monospace; }
-    .history { margin-top: 16px; border-top: 1px dashed #333; padding-top: 10px; font-size: 11px; }
-    .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #151525; color: #aaa; }
-    .hist-item a { color: #00f0ff; text-decoration: none; font-weight: bold; }
+    :root {
+      --bg: #06060e;
+      --card: rgba(14, 15, 28, 0.88);
+      --blue: #00f0ff;
+      --red: #ff0055;
+      --green: #00ff88;
+      --text: #e2f1ff;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.12) 0%, transparent 45%),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 25px 25px, 25px 25px;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+    }
+    .hud-card {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.12);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hud-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .brand {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin: 0;
+      background: linear-gradient(90deg, #fff, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #8a99ad;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #778899;
+      transition: all 0.25s ease;
+    }
+    .badge.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.12);
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+      transform: scale(1.05);
+    }
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #080912;
+      border: 1.5px solid rgba(0, 240, 255, 0.4);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 14px;
+      transition: all 0.25s;
+    }
+    .input-box:focus-within {
+      border-color: var(--green);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.25);
+    }
+    input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 10px;
+      outline: none;
+      width: 100%;
+    }
+    input::placeholder { color: #526075; }
+    .btn-clear {
+      background: transparent;
+      border: none;
+      color: #ff0055;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 0 8px;
+      cursor: pointer;
+      display: none;
+    }
+    .btn-paste {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+    .btn-paste:active { background: var(--blue); color: #000; }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .select-wrap, .mode-toggle {
+      background: #080912;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    select {
+      width: 100%;
+      background: #080912;
+      color: var(--blue);
+      border: none;
+      padding: 11px 12px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+    }
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #6c7a89;
+      padding: 11px 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .mode-btn.active {
+      background: rgba(255, 0, 85, 0.18);
+      color: #fff;
+      border-bottom: 2px solid var(--red);
+    }
+    .btn-main {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--blue), #00a2ff);
+      color: #04050a;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      box-shadow: 0 5px 20px rgba(0, 240, 255, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-main:active {
+      transform: scale(0.98);
+      background: linear-gradient(135deg, var(--green), var(--blue));
+    }
+    .status-panel {
+      margin-top: 18px;
+      background: rgba(6, 7, 15, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid var(--blue);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #a0b2c6;
+    }
+    .preview-card {
+      display: none;
+      margin-top: 14px;
+      background: #0a0b16;
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: left;
+    }
+    .preview-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .preview-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--blue);
+      background: #111;
+    }
+    .preview-info { flex: 1; overflow: hidden; }
+    .preview-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 4px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .preview-author {
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .action-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .dl-btn {
+      flex: 1;
+      text-align: center;
+      padding: 11px 12px;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+    }
+    .dl-btn.secondary {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      box-shadow: none;
+    }
+    .history {
+      margin-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 12px;
+      display: none;
+    }
+    .hist-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      color: var(--blue);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .hist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .hist-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 210px;
+      color: #cbd5e1;
+    }
+    .hist-item a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--blue);
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="hud">
-    <h2>⚡ CYBER-DL // MAX HUD</h2>
-    
-    <div class="input-group">
-      <input type="text" id="videoUrl" placeholder="Pega link de YT, TikTok, FB, Reels..." />
-      <button class="btn-paste" onclick="pegar()">PEGAR</button>
+
+  <div class="hud-card">
+    <div class="header">
+      <h1 class="brand">MILTICO TUBE</h1>
+      <div class="subtitle">Max Resolution Streamer</div>
     </div>
 
-    <div class="controls">
-      <select id="qualitySelect">
-        <option value="max">🔥 CALIDAD: MAX (4K/1080p)</option>
-        <option value="1080">🎬 CALIDAD: 1080p Full HD</option>
-        <option value="720">⚡ CALIDAD: 720p Rápido</option>
-      </select>
-      <button class="mode-btn" id="btnAudio" onclick="toggleAudio()">🎵 SOLO MP3: OFF</button>
+    <div class="badges">
+      <span class="badge" id="b-yt">▶ YOUTUBE</span>
+      <span class="badge" id="b-tt">♪ TIKTOK HD</span>
+      <span class="badge" id="b-ig">◈ REELS</span>
+      <span class="badge" id="b-fb">f FACEBOOK</span>
     </div>
 
-    <button class="btn-dl" onclick="descargar()">EXTRAER STREAM</button>
-    
-    <div id="status">SISTEMA LISTO // ESPERANDO SEÑAL</div>
+    <div class="input-box">
+      <input type="text" id="videoUrl" placeholder="Pega aquí el enlace del vídeo..." oninput="detectarRed()" />
+      <button class="btn-clear" id="btnClear" onclick="limpiarInput()">✕</button>
+      <button class="btn-paste" onclick="pegar()">📋 PEGAR</button>
+    </div>
 
-    <div class="history" id="histBox" style="display:none;">
-      <div style="color:#ff003c; font-weight:bold; margin-bottom:5px;">ÚLTIMAS EXTRACCIONES:</div>
+    <div class="options-grid">
+      <div class="select-wrap">
+        <select id="qualitySelect">
+          <option value="max">🔥 MAX (4K / 1080p)</option>
+          <option value="1080">🎬 1080p Full HD</option>
+          <option value="720">⚡ 720p Rápido</option>
+        </select>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeVid" onclick="setMode(false)">🎬 VÍDEO</button>
+        <button class="mode-btn" id="modeAud" onclick="setMode(true)">🎵 MP3</button>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="descargar()">⚡ DESCARGAR AHORA</button>
+
+    <div class="status-panel" id="status">
+      SISTEMA EN LÍNEA // PEGA UN LINK PARA INICIAR
+    </div>
+
+    <div class="preview-card" id="previewCard">
+      <div class="preview-top">
+        <img id="prevThumb" class="preview-thumb" src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="thumb" />
+        <div class="preview-info">
+          <p class="preview-title" id="prevTitle">Vídeo Extraído</p>
+          <div class="preview-author" id="prevAuthor">Miltico Tube Engine</div>
+        </div>
+      </div>
+      <div class="action-btns" id="actionBtns"></div>
+    </div>
+
+    <div class="history" id="histBox">
+      <div class="hist-title">HISTORIAL RECIENTE</div>
       <div id="histList"></div>
     </div>
   </div>
@@ -60,11 +404,10 @@
 
     let isAudio = false;
 
-    function toggleAudio() {
-      isAudio = !isAudio;
-      const btn = document.getElementById('btnAudio');
-      btn.classList.toggle('active', isAudio);
-      btn.innerText = isAudio ? '🎵 SOLO MP3: ON' : '🎵 SOLO MP3: OFF';
+    function setMode(audioMode) {
+      isAudio = audioMode;
+      document.getElementById('modeVid').classList.toggle('active', !isAudio);
+      document.getElementById('modeAud').classList.toggle('active', isAudio);
     }
 
     function limpiarUrl(texto) {
@@ -72,55 +415,71 @@
       return match ? match[0] : texto.trim();
     }
 
+    function detectarRed() {
+      const val = document.getElementById('videoUrl').value.toLowerCase();
+      document.getElementById('btnClear').style.display = val.length > 0 ? 'block' : 'none';
+      document.getElementById('b-yt').classList.toggle('active', val.includes('youtu'));
+      document.getElementById('b-tt').classList.toggle('active', val.includes('tiktok'));
+      document.getElementById('b-ig').classList.toggle('active', val.includes('instagram'));
+      document.getElementById('b-fb').classList.toggle('active', val.includes('facebook') || val.includes('fb.'));
+    }
+
+    function limpiarInput() {
+      document.getElementById('videoUrl').value = '';
+      detectarRed();
+      document.getElementById('previewCard').style.display = 'none';
+      document.getElementById('status').innerText = 'SISTEMA EN LÍNEA // ESPERANDO ENLACE';
+    }
+
     async function pegar() {
       try {
         const text = await navigator.clipboard.readText();
         document.getElementById('videoUrl').value = limpiarUrl(text);
+        detectarRed();
       } catch (e) {
-        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro para pegar manualmente';
+        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro de texto y toca Pegar';
       }
     }
 
     async function forzarDescarga(url, filename) {
       const status = document.getElementById('status');
       try {
-        status.innerText = '⏬ Descargando directo a tu dispositivo...';
+        status.innerHTML = '<span class="loader"></span> Guardando archivo en tu galería/descargas...';
         const res = await fetch(url);
         const blob = await res.blob();
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = filename || (isAudio ? 'audio_max.mp3' : 'video_max.mp4');
+        a.download = filename || (isAudio ? 'MilticoTube_Audio.mp3' : 'MilticoTube_Video.mp4');
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(blobUrl);
-        status.innerHTML = `✅ DESCARGA COMPLETADA<br><a class="dl-link" href="${url}" target="_blank">🔗 ABRIR ENLACE DIRECTO</a>`;
+        status.innerHTML = '✅ ¡Archivo descargado en tu dispositivo!';
       } catch (e) {
-        // Si el servidor externo bloquea CORS para blob, abre descarga directa
-        window.location.href = url;
+        status.innerHTML = '✅ Redirigiendo al archivo directo...';
+        window.open(url, '_blank');
       }
     }
 
-    function guardarHistorial(origen, urlDescarga) {
-      let hist = JSON.parse(localStorage.getItem('cyber_dl_hist') || '[]');
-      const dominio = new URL(origen).hostname.replace('www.', '');
-      hist.unshift({ dom: dominio, url: urlDescarga, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+    function guardarHistorial(titulo, urlDescarga) {
+      let hist = JSON.parse(localStorage.getItem('miltico_hist') || '[]');
+      hist.unshift({ title: titulo, url: urlDescarga, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
       hist = hist.slice(0, 5);
-      localStorage.setItem('cyber_dl_hist', JSON.stringify(hist));
+      localStorage.setItem('miltico_hist', JSON.stringify(hist));
       renderHistorial();
     }
 
     function renderHistorial() {
-      const hist = JSON.parse(localStorage.getItem('cyber_dl_hist') || '[]');
+      const hist = JSON.parse(localStorage.getItem('miltico_hist') || '[]');
       const box = document.getElementById('histBox');
       const list = document.getElementById('histList');
       if (!hist.length) return;
       box.style.display = 'block';
       list.innerHTML = hist.map(h => `
         <div class="hist-item">
-          <span>[${h.time}] ${h.dom}</span>
-          <a href="${h.url}" target="_blank" download>[BAJAR DE NUEVO]</a>
+          <span>[${h.time}] ${h.title}</span>
+          <a href="${h.url}" target="_blank" download>⬇ BAJAR</a>
         </div>
       `).join('');
     }
@@ -129,12 +488,20 @@
       const input = document.getElementById('videoUrl');
       const cleanUrl = limpiarUrl(input.value);
       input.value = cleanUrl;
+      detectarRed();
+
       const quality = document.getElementById('qualitySelect').value;
       const status = document.getElementById('status');
+      const preview = document.getElementById('previewCard');
 
-      if (!cleanUrl.startsWith('http')) return status.innerText = '⚠️ ERROR: PEGA UN ENLACE VÁLIDO';
+      if (!cleanUrl.startsWith('http')) {
+        status.innerText = '⚠️ Por favor pega un enlace válido primero';
+        return;
+      }
 
-      status.innerText = '⏳ INTERCEPTANDO STREAM EN MÁXIMA CALIDAD...';
+      preview.style.display = 'none';
+      status.innerHTML = '<span class="loader"></span> Extrayendo stream en máxima calidad...';
+
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
@@ -143,20 +510,33 @@
         });
         const data = await res.json();
 
-        if (data.picker && data.picker.length > 0) {
-          status.innerHTML = '✅ CARRUSEL DETECTADO:<br>' + data.picker.map((item, i) => 
-            `<a class="dl-link" href="${item.url}" target="_blank" download>⬇️ ARCHIVO ${i+1}</a>`
-          ).join('');
-          guardarHistorial(cleanUrl, data.picker[0].url);
-        } else if (data.url) {
-          status.innerHTML = `<div>✅ STREAM LISTO<br><button class="dl-link" onclick="forzarDescarga('${data.url}', '${data.filename || ''}')">⬇️ GUARDAR ARCHIVO</button><a class="dl-link" style="background:#1a1a2e;border:1px solid #00f0ff;" href="${data.url}" target="_blank">🔗 LINK DIRECTO</a></div>`;
-          guardarHistorial(cleanUrl, data.url);
-          forzarDescarga(data.url, data.filename);
+        if (data.url || (data.picker && data.picker.length > 0)) {
+          status.innerText = '✅ ¡Stream obtenido con éxito!';
+          preview.style.display = 'block';
+          document.getElementById('prevTitle').innerText = data.title || 'Vídeo en Máxima Calidad';
+          document.getElementById('prevAuthor').innerText = data.author ? `@${data.author}` : 'Miltico Tube Ready';
+          document.getElementById('prevThumb').src = data.thumb || 'https://cdn-icons-png.flaticon.com/512/724/724933.png';
+
+          const btns = document.getElementById('actionBtns');
+          if (data.picker && data.picker.length > 0) {
+            btns.innerHTML = data.picker.map((item, i) => 
+              `<a class="dl-btn" href="${item.url}" target="_blank" download>⬇ ARCHIVO ${i+1}</a>`
+            ).join('');
+            guardarHistorial(data.title || 'Carrusel', data.picker[0].url);
+          } else {
+            const safeName = (data.filename || 'MilticoTube.mp4').replace(/'/g, '');
+            btns.innerHTML = `
+              <button class="dl-btn" onclick="forzarDescarga('${data.url}', '${safeName}')">⬇ GUARDAR EN TELÉFONO</button>
+              <a class="dl-btn secondary" href="${data.url}" target="_blank" download>🔗 ABRIR DIRECTO</a>
+            `;
+            guardarHistorial(data.title || 'Vídeo HD', data.url);
+            forzarDescarga(data.url, safeName);
+          }
         } else {
-          status.innerText = '❌ ' + (data.error || 'No se pudo extraer el vídeo');
+          status.innerText = '❌ ' + (data.error || 'No se pudo extraer este vídeo');
         }
       } catch (e) {
-        status.innerText = '❌ ERROR DE CONEXIÓN CON EL SERVIDOR';
+        status.innerText = '❌ Error de red. Verifica tu conexión e intenta de nuevo.';
       }
     }
 
@@ -167,6 +547,7 @@
       const clean = limpiarUrl(shared);
       if (clean.startsWith('http')) {
         document.getElementById('videoUrl').value = clean;
+        detectarRed();
         descargar();
       }
     });
