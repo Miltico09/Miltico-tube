@@ -1,24 +1,40 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  const { url, mode = 'auto' } = req.body;
+  const { url, mode = 'auto', quality = 'max' } = req.body;
   if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
 
-  // 1. Motor directo para TikTok en máxima calidad original (Sin compresión ni marca de agua)
+  // 1. Motor directo para TikTok (Sin marca de agua, respeta calidad y carruseles)
   if (url.includes('tiktok.com')) {
     try {
-      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`);
+      const isHd = (quality === 'max' || quality === '1080') ? 1 : 0;
+      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=${isHd}`);
       const ttData = await ttRes.json();
+      
       if (ttData.code === 0 && ttData.data) {
-        const videoUrl = mode === 'audio' ? ttData.data.music : (ttData.data.hdplay || ttData.data.play);
-        return res.status(200).json({ url: videoUrl, title: ttData.data.title || 'TikTok_HD' });
+        // Si el TikTok es un carrusel de fotos
+        if (ttData.data.images && ttData.data.images.length > 0 && mode !== 'audio') {
+          return res.status(200).json({
+            url: ttData.data.images[0],
+            picker: ttData.data.images.map(img => ({ url: img }))
+          });
+        }
+        // Si es vídeo o solo audio MP3
+        const streamUrl = mode === 'audio' 
+          ? ttData.data.music 
+          : (isHd ? (ttData.data.hdplay || ttData.data.play) : ttData.data.play);
+          
+        return res.status(200).json({
+          url: streamUrl,
+          filename: mode === 'audio' ? 'tiktok_audio.mp3' : 'tiktok_max.mp4'
+        });
       }
     } catch (e) {
       // Si falla, pasa automáticamente a los nodos multiplataforma de abajo
     }
   }
 
-  // 2. Lista de nodos Cobalt Multiplataforma (YouTube 4K/1080p, FB, Instagram Reels, TikTok)
+  // 2. Nodos Cobalt Multiplataforma (YouTube 4K/1080p/720p, Facebook, Instagram Reels, TikTok)
   const instances = [
     { url: 'https://cobalt-api.kwiatekmiki.com', v: 10 },
     { url: 'https://cobalt-backend.canine.tools', v: 10 },
@@ -29,14 +45,14 @@ export default async function handler(req, res) {
     try {
       const payload = node.v === 10 ? {
         url: url,
-        videoQuality: 'max',
+        videoQuality: String(quality),
         audioFormat: 'mp3',
         filenameStyle: 'pretty',
         downloadMode: mode === 'audio' ? 'audio' : 'auto',
         tiktokFullAudio: true
       } : {
         url: url,
-        vQuality: 'max',
+        vQuality: String(quality),
         isAudioOnly: mode === 'audio',
         filenamePattern: 'pretty'
       };
@@ -53,16 +69,21 @@ export default async function handler(req, res) {
 
       const data = await response.json();
 
-      // Si devuelve enlace directo o túnel de descarga
       if (data.url) {
-        return res.status(200).json({ url: data.url, filename: data.filename || 'video_max.mp4' });
+        return res.status(200).json({
+          url: data.url,
+          filename: data.filename || (mode === 'audio' ? 'audio_max.mp3' : 'video_max.mp4')
+        });
       }
-      // Si es un carrusel o tiene múltiples pistas (picker)
+
       if (data.picker && data.picker.length > 0) {
-        return res.status(200).json({ url: data.picker[0].url, picker: data.picker });
+        return res.status(200).json({
+          url: data.picker[0].url,
+          picker: data.picker
+        });
       }
     } catch (err) {
-      continue; // Intenta con el siguiente nodo automáticamente
+      continue;
     }
   }
 
