@@ -33,7 +33,7 @@ function decodeEscapedUrl(rawStr) {
 }
 
 async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 4200, ...fetchOptions } = options;
+  const { timeout = 4500, ...fetchOptions } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
   const ext = mode === 'audio' ? 'mp3' : 'mp4';
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
-  // Normalización y resolución de enlaces cortos
+  // Normalizar URL
   try {
     if (url.includes('instagram.com')) {
       url = url.split('?')[0];
@@ -73,82 +73,88 @@ export default async function handler(req, res) {
         method: 'GET',
         redirect: 'follow',
         headers: { 'User-Agent': uaMobile },
-        timeout: 3000
+        timeout: 2800
       });
       if (redir.url && redir.url.startsWith('http')) url = redir.url;
     }
   } catch {}
 
   // ==========================================
-  // 1. MOTOR YOUTUBE (Multi-Instancia Rápida + oEmbed)
+  // 1. MOTOR YOUTUBE (Nodos en Paralelo)
   // ==========================================
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    let ytTitle = 'YouTube_Video';
-    let ytThumb = '';
-
-    // Obtener título y miniatura reales rápido
-    try {
-      const oembed = await fetchWithTimeout(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, { timeout: 2000 });
-      if (oembed.ok) {
-        const meta = await oembed.json();
-        ytTitle = meta.title || ytTitle;
-        ytThumb = meta.thumbnail_url || '';
-      }
-    } catch {}
-
     const vQuality = quality === 'max' ? '1080' : String(quality);
 
-    // Lista de instancias compatibles (v7 y v10)
-    const cobaltNodes = [
-      { api: 'https://co.eepy.today/api/json', v10: false },
-      { api: 'https://cobalt-api.kwiatekmiki.com', v10: true },
-      { api: 'https://cobalt.api.timelessnesses.me', v10: true }
-    ];
-
-    for (const node of cobaltNodes) {
-      try {
-        const payload = node.v10
-          ? {
-              url,
-              videoQuality: vQuality,
-              audioFormat: 'mp3',
-              filenameStyle: 'pretty',
-              downloadMode: mode === 'audio' ? 'audio' : 'auto'
-            }
-          : {
-              url,
-              vQuality,
-              aFormat: 'mp3',
-              filenamePattern: 'pretty',
-              isAudioOnly: mode === 'audio'
-            };
-
-        const ytRes = await fetchWithTimeout(node.api, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'User-Agent': uaDesktop
-          },
-          body: JSON.stringify(payload),
-          timeout: 3800
-        });
-
-        if (ytRes.ok) {
-          const ytData = await ytRes.json();
-          const finalUrl = ytData.url || ytData.audio;
-          if (finalUrl) {
-            const title = ytData.filename || ytTitle;
-            return res.status(200).json({
-              url: finalUrl,
-              title,
-              thumb: ytThumb,
-              filename: limpiarNombre(title, ext, qLabel)
-            });
+    const tryCobaltNode = async (endpoint, isV10) => {
+      const payload = isV10
+        ? {
+            url,
+            videoQuality: vQuality,
+            audioFormat: 'mp3',
+            filenameStyle: 'pretty',
+            downloadMode: mode === 'audio' ? 'audio' : 'auto'
           }
-        }
-      } catch {}
-    }
+        : {
+            url,
+            vQuality,
+            aFormat: 'mp3',
+            filenamePattern: 'pretty',
+            isAudioOnly: mode === 'audio'
+          };
+
+      const r = await fetchWithTimeout(endpoint, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': uaDesktop
+        },
+        body: JSON.stringify(payload),
+        timeout: 5000
+      });
+
+      if (!r.ok) throw new Error('Node failed');
+      const d = await r.json();
+      const stream = d.url || d.audio;
+      if (!stream) throw new Error('No URL');
+      return { url: stream, title: d.filename || 'YouTube_Video' };
+    };
+
+    const tryVkrNode = async () => {
+      const r = await fetchWithTimeout(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
+        headers: { 'User-Agent': uaMobile },
+        timeout: 5500
+      });
+      if (!r.ok) throw new Error('VKR failed');
+      const d = await r.json();
+      const dlList = d?.data?.downloads || d?.downloads || [];
+      const best =
+        dlList.find(x => x.url && String(x.ext || x.format_id || '').includes('mp4')) ||
+        dlList.find(x => x.url) ||
+        dlList[0];
+      if (!best || !best.url) throw new Error('No VKR URL');
+      return {
+        url: best.url,
+        title: d?.data?.title || d?.title || 'YouTube_Video',
+        thumb: d?.data?.thumbnail || d?.thumbnail || ''
+      };
+    };
+
+    try {
+      const winner = await Promise.any([
+        tryCobaltNode('https://co.eepy.today/api/json', false),
+        tryCobaltNode('https://cobalt-api.kwiatekmiki.com', true),
+        tryCobaltNode('https://cobalt.api.timelessnesses.me', true),
+        tryVkrNode()
+      ]);
+
+      return res.status(200).json({
+        url: winner.url,
+        title: winner.title,
+        thumb: winner.thumb || '',
+        filename: limpiarNombre(winner.title, ext, qLabel)
+      });
+    } catch {}
   }
 
   // ==========================================
@@ -193,7 +199,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 3. MOTOR INSTAGRAM REELS / POSTS
+  // 3. MOTOR INSTAGRAM REELS
   // ==========================================
   if (url.includes('instagram.com')) {
     try {
@@ -203,8 +209,7 @@ export default async function handler(req, res) {
         const headers = {
           'User-Agent': uaDesktop,
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-          'Sec-Fetch-Mode': 'navigate'
+          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
         };
         if (cookie) headers['Cookie'] = cookie;
 
@@ -250,9 +255,7 @@ export default async function handler(req, res) {
       const headers = {
         'User-Agent': uaDesktop,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'es-ES,es;q=0.9',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-Mode': 'navigate'
+        'Accept-Language': 'es-ES,es;q=0.9'
       };
       if (cookie) headers['Cookie'] = cookie;
 
@@ -291,7 +294,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 5. PASARELA UNIVERSAL DE RESPALDO (YouTube, Meta, TikTok)
+  // 5. PASARELA UNIVERSAL DE RESPALDO
   // ==========================================
   try {
     const r = await fetchWithTimeout(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
@@ -302,14 +305,13 @@ export default async function handler(req, res) {
       const d = await r.json();
       const dlList = d?.data?.downloads || d?.downloads || [];
       if (dlList.length > 0) {
-        // Priorizar formatos con audio+video (mp4) o el primero disponible
         const best =
           dlList.find(x => x.url && String(x.ext || x.format_id || '').includes('mp4')) ||
           dlList.find(x => x.url) ||
           dlList[0];
 
         if (best && best.url) {
-          const title = d?.data?.title || d?.title || 'Video_Extraido';
+          const title = d?.data?.title || d?.title || 'Video_Social';
           return res.status(200).json({
             url: best.url,
             title,
@@ -322,6 +324,6 @@ export default async function handler(req, res) {
   } catch {}
 
   return res.status(500).json({
-    error: 'No se pudo extraer el enlace en este momento. Verifica que el vídeo sea público e intenta nuevamente.'
+    error: 'No se pudo procesar el enlace. Verifica que el vídeo sea público e intenta de nuevo.'
   });
 }
