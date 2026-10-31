@@ -4,81 +4,155 @@ export default async function handler(req, res) {
   const { url, mode = 'auto', quality = 'max' } = req.body;
   if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
 
-  // 1. Motor directo para TikTok (Sin marca de agua, respeta calidad y carruseles)
+  const ua = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
+
+  // ==========================================
+  // 1. MOTOR TIKTOK (HD sin marca de agua + Carruseles)
+  // ==========================================
   if (url.includes('tiktok.com')) {
     try {
       const isHd = (quality === 'max' || quality === '1080') ? 1 : 0;
-      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=${isHd}`);
+      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=${isHd}`, {
+        headers: { 'User-Agent': ua }
+      });
       const ttData = await ttRes.json();
-      
       if (ttData.code === 0 && ttData.data) {
-        // Si el TikTok es un carrusel de fotos
-        if (ttData.data.images && ttData.data.images.length > 0 && mode !== 'audio') {
+        const d = ttData.data;
+        if (d.images && d.images.length > 0 && mode !== 'audio') {
           return res.status(200).json({
-            url: ttData.data.images[0],
-            picker: ttData.data.images.map(img => ({ url: img }))
+            url: d.images[0],
+            title: d.title || 'TikTok Carrusel',
+            thumb: d.cover,
+            author: d.author?.nickname || 'TikTok',
+            picker: d.images.map(img => ({ url: img }))
           });
         }
-        // Si es vídeo o solo audio MP3
-        const streamUrl = mode === 'audio' 
-          ? ttData.data.music 
-          : (isHd ? (ttData.data.hdplay || ttData.data.play) : ttData.data.play);
-          
+        const streamUrl = mode === 'audio' ? d.music : (isHd ? (d.hdplay || d.play) : d.play);
         return res.status(200).json({
           url: streamUrl,
-          filename: mode === 'audio' ? 'tiktok_audio.mp3' : 'tiktok_max.mp4'
+          title: d.title || 'TikTok Video HD',
+          thumb: d.cover,
+          author: d.author?.nickname || 'TikTok',
+          filename: mode === 'audio' ? 'MilticoTube_TikTok.mp3' : 'MilticoTube_TikTok_HD.mp4'
         });
       }
-    } catch (e) {
-      // Si falla, pasa automáticamente a los nodos multiplataforma de abajo
+    } catch (e) {}
+  }
+
+  // ==========================================
+  // 2. MOTOR YOUTUBE DIRECTO (Piped / Invidious APIs)
+  // ==========================================
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|shorts\/))([^&?/\s]{11})/);
+  if (ytMatch) {
+    const videoId = ytMatch[1];
+    const pipedNodes = [
+      'https://pipedapi.kavin.rocks',
+      'https://pipedapi.tokhmi.xyz',
+      'https://pipedapi.syncpundit.io',
+      'https://api.piped.projectsegfau.lt'
+    ];
+    for (const api of pipedNodes) {
+      try {
+        const r = await fetch(`${api}/streams/${videoId}`, { headers: { 'User-Agent': ua } });
+        if (!r.ok) continue;
+        const data = await r.json();
+        if (mode === 'audio' && data.audioStreams?.length) {
+          const bestAudio = data.audioStreams.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+          return res.status(200).json({
+            url: bestAudio.url,
+            title: data.title,
+            thumb: data.thumbnailUrl,
+            author: data.uploader,
+            filename: 'MilticoTube_Audio.mp3'
+          });
+        }
+        if (data.videoStreams?.length) {
+          // Buscamos streams con audio y vídeo integrados o el de mayor resolución
+          const combined = data.videoStreams.filter(s => s.videoOnly === false);
+          const pool = combined.length ? combined : data.videoStreams;
+          const bestVideo = pool[0];
+          if (bestVideo?.url) {
+            return res.status(200).json({
+              url: bestVideo.url,
+              title: data.title,
+              thumb: data.thumbnailUrl,
+              author: data.uploader,
+              filename: 'MilticoTube_YT.mp4'
+            });
+          }
+        }
+      } catch (e) { continue; }
     }
   }
 
-  // 2. Nodos Cobalt Multiplataforma (YouTube 4K/1080p/720p, Facebook, Instagram Reels, TikTok)
-  const instances = [
-    { url: 'https://cobalt-api.kwiatekmiki.com', v: 10 },
-    { url: 'https://cobalt-backend.canine.tools', v: 10 },
-    { url: 'https://api.cobalt.tools/api/json', v: 7 }
+  // ==========================================
+  // 3. MOTOR MULTIPLATAFORMA VKR (FB, IG Reels, YT, TikTok)
+  // ==========================================
+  try {
+    const vkrRes = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
+      headers: { 'User-Agent': ua }
+    });
+    const vkrData = await vkrRes.json();
+    if (vkrData?.data?.downloads?.length > 0) {
+      const downloads = vkrData.data.downloads;
+      const sorted = downloads.filter(d => d.url).reverse();
+      const chosen = mode === 'audio'
+        ? (sorted.find(d => d.ext === 'mp3' || d.ext === 'm4a') || sorted[0])
+        : sorted[0];
+      if (chosen?.url) {
+        return res.status(200).json({
+          url: chosen.url,
+          title: vkrData.data.title || 'Video Extraído',
+          thumb: vkrData.data.thumbnail || '',
+          filename: mode === 'audio' ? 'MilticoTube_Audio.mp3' : 'MilticoTube_Video.mp4'
+        });
+      }
+    }
+  } catch (e) {}
+
+  // ==========================================
+  // 4. NODOS COBALT ABIERTOS ACTUALIZADOS (Fallback)
+  // ==========================================
+  const cobaltNodes = [
+    'https://cobalt.api.timelessnesses.me',
+    'https://co.eepy.today',
+    'https://cobalt-api.kwiatekmiki.com',
+    'https://cobalt-backend.canine.tools'
   ];
 
-  for (const node of instances) {
+  for (const nodeUrl of cobaltNodes) {
     try {
-      const payload = node.v === 10 ? {
-        url: url,
-        videoQuality: String(quality),
-        audioFormat: 'mp3',
-        filenameStyle: 'pretty',
-        downloadMode: mode === 'audio' ? 'audio' : 'auto',
-        tiktokFullAudio: true
-      } : {
-        url: url,
-        vQuality: String(quality),
-        isAudioOnly: mode === 'audio',
-        filenamePattern: 'pretty'
-      };
-
-      const response = await fetch(node.url, {
+      const response = await fetch(nodeUrl, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Linux; Android 14)'
+          'User-Agent': ua,
+          'Origin': nodeUrl,
+          'Referer': nodeUrl + '/'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          url: url,
+          videoQuality: String(quality),
+          audioFormat: 'mp3',
+          filenameStyle: 'pretty',
+          downloadMode: mode === 'audio' ? 'audio' : 'auto',
+          tiktokFullAudio: true
+        })
       });
 
       const data = await response.json();
-
       if (data.url) {
         return res.status(200).json({
           url: data.url,
-          filename: data.filename || (mode === 'audio' ? 'audio_max.mp3' : 'video_max.mp4')
+          title: data.filename || 'Stream Extraído en Máxima Calidad',
+          filename: data.filename || (mode === 'audio' ? 'MilticoTube.mp3' : 'MilticoTube.mp4')
         });
       }
-
       if (data.picker && data.picker.length > 0) {
         return res.status(200).json({
           url: data.picker[0].url,
+          title: 'Carrusel Multimedia Extraído',
           picker: data.picker
         });
       }
@@ -87,5 +161,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(500).json({ error: 'Nodos ocupados o vídeo privado. Intenta de nuevo en unos segundos.' });
+  return res.status(500).json({ error: 'No se pudo extraer este enlace. Verifica que el vídeo sea público.' });
 }
