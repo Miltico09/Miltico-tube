@@ -4,9 +4,9 @@ export default async function handler(req, res) {
   let { url } = req.body;
   if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
 
-  const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+  const ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-  // Limpiar URL de Instagram y Facebook de rastreadores
+  // Limpieza de URLs acortadas o rastreadores de Meta
   try {
     if (url.includes('instagram.com')) url = url.split('?')[0];
     if (url.includes('fb.watch') || url.includes('/share/')) {
@@ -15,7 +15,6 @@ export default async function handler(req, res) {
     }
   } catch (e) {}
 
-  // Función para formatear el nombre limpio basado en la URL o ID
   function generarNombre(tituloOriginal, plataforma) {
     const base = (tituloOriginal || '')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -29,12 +28,12 @@ export default async function handler(req, res) {
     return `${nombreLimpio}_${tag}.mp4`;
   }
 
-  // 1. MOTOR ESPECIALIZADO 1: All-In-One Social Downloader API
+  // 1. MOTOR PASARELA PRINCIPAL PARA INSTAGRAM Y FACEBOOK (Snapsave / VKR Mirror)
   try {
-    const response = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
+    const apiRes = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
       headers: { 'User-Agent': ua }
     });
-    const data = await response.json();
+    const data = await apiRes.json();
     const dlList = data?.data?.downloads || data?.downloads || [];
     if (dlList.length > 0) {
       const best = dlList.find(x => x.url) || dlList[0];
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
     }
   } catch (e) {}
 
-  // 2. MOTOR ESPECIALIZADO 2: Cobalt Engine (Excelente para YouTube, TikTok, Reels públicos)
+  // 2. MOTOR PASARELA SECUNDARIA (SaveFrom / Cobalt Mirror)
   try {
     const cobaltRes = await fetch('https://co.eepy.today/api/json', {
       method: 'POST',
@@ -64,17 +63,9 @@ export default async function handler(req, res) {
         filename: generarNombre(cData.filename, 'MilticoTube')
       });
     }
-    if (cData.picker && cData.picker.length > 0) {
-      return res.status(200).json({
-        url: cData.picker[0].url,
-        title: 'Carrusel',
-        thumb: '',
-        filename: generarNombre('Carrusel', 'MilticoTube')
-      });
-    }
   } catch (e) {}
 
-  // 3. MOTOR ESPECIALIZADO 3: SnapSave / SaveFrom mirror API
+  // 3. MOTOR PASARELA TERCIARIA (TikWM Mirror para Reels y FB Watch)
   try {
     const mirrorRes = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`, {
       headers: { 'User-Agent': ua }
@@ -87,10 +78,10 @@ export default async function handler(req, res) {
         url: vUrl,
         title: d.title || 'Video',
         thumb: d.cover || '',
-        filename: generarNombre(d.title, 'TikTok_FB')
+        filename: generarNombre(d.title, 'Meta_Video')
       });
     }
   } catch (e) {}
 
-  return res.status(500).json({ error: 'No se pudo procesar este enlace. Asegúrate de que la publicación o Reel sea completamente público.' });
+  return res.status(500).json({ error: 'Meta bloqueó la petición temporalmente. Intenta recargar la app en unos segundos.' });
 }
