@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#020307">
-  <link rel="manifest" href="/manifest.json">
-  <title>MILTICO TUBE // CYBER HUD v3.0</title>
+  <title>MILTICO TUBE // CYBER HUD v4.0</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #020307;
-      --card: rgba(7, 10, 20, 0.82);
+      --card: rgba(7, 10, 20, 0.84);
       --cyan: #00f0ff;
       --pink: #ff0055;
       --green: #00ff88;
       --yellow: #fcee0a;
       --text: #e6f9ff;
-      --border-cyan: rgba(0, 240, 255, 0.38);
+      --border-cyan: rgba(0, 240, 255, 0.42);
     }
 
     * {
@@ -39,7 +41,7 @@
       position: relative;
     }
 
-    /* CANVAS DE CÓDIGO CAYENDO EN CASCADA */
+    /* CASCADA DE CÓDIGO CYBERPUNK */
     #cyberCanvas {
       position: fixed;
       top: 0;
@@ -48,24 +50,23 @@
       height: 100vh;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.55;
+      opacity: 0.6;
     }
 
-    /* REJILLA HOLOGRÁFICA Y NEBlinas NEÓN DE FONDO */
+    /* REJILLA HOLOGRÁFICA Y LUCES DE FONDO */
     .cyber-grid {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.14) 0%, transparent 42%),
-        radial-gradient(circle at 85% 80%, rgba(255, 0, 85, 0.14) 0%, transparent 45%),
-        linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.16) 0%, transparent 42%),
+        radial-gradient(circle at 85% 80%, rgba(255, 0, 85, 0.16) 0%, transparent 45%),
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 26px 26px, 26px 26px;
     }
 
-    /* LÍNEAS DE ESCANEO CRT */
     .scanlines {
       position: fixed;
       inset: 0;
@@ -79,7 +80,7 @@
       );
     }
 
-    /* MARCO PRINCIPAL CYBERPUNK */
+    /* CONTENEDOR PRINCIPAL HUD */
     .hud-frame {
       position: relative;
       z-index: 10;
@@ -90,22 +91,22 @@
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--border-cyan);
       border-radius: 18px;
-      padding: 24px 20px 22px;
+      padding: 22px 18px 20px;
       box-shadow:
-        0 0 35px rgba(0, 240, 255, 0.15),
-        0 20px 60px rgba(0, 0, 0, 0.9),
-        inset 0 0 25px rgba(0, 240, 255, 0.05);
+        0 0 35px rgba(0, 240, 255, 0.18),
+        0 20px 60px rgba(0, 0, 0, 0.92),
+        inset 0 0 25px rgba(0, 240, 255, 0.06);
       overflow: hidden;
-      animation: framePulse 5s ease-in-out infinite alternate;
+      animation: framePulse 4.5s ease-in-out infinite alternate;
     }
 
     @keyframes framePulse {
-      0% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.12), inset 0 0 18px rgba(0, 240, 255, 0.04); }
-      50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.25), 0 0 15px rgba(255, 0, 85, 0.15), inset 0 0 28px rgba(0, 240, 255, 0.08); }
-      100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 22px rgba(255, 0, 85, 0.06); }
+      0% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 18px rgba(0, 240, 255, 0.04); }
+      50% { box-shadow: 0 0 42px rgba(0, 240, 255, 0.28), 0 0 18px rgba(255, 0, 85, 0.18), inset 0 0 28px rgba(0, 240, 255, 0.08); }
+      100% { box-shadow: 0 0 32px rgba(0, 255, 136, 0.22), inset 0 0 22px rgba(255, 0, 85, 0.06); }
     }
 
-    /* LÁSER ESCÁNER QUE RECORRE LA TARJETA */
+    /* LÁSER ESCÁNER ANIMADO */
     .hud-frame::after {
       content: "";
       position: absolute;
@@ -113,20 +114,20 @@
       right: 0;
       height: 2px;
       background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
-      box-shadow: 0 0 12px var(--cyan);
-      opacity: 0.65;
-      animation: laserScan 6s linear infinite;
+      box-shadow: 0 0 14px var(--cyan);
+      opacity: 0.7;
+      animation: laserScan 5.5s linear infinite;
       pointer-events: none;
     }
 
     @keyframes laserScan {
       0% { top: -5%; opacity: 0; }
-      10% { opacity: 0.75; }
-      90% { opacity: 0.75; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
       100% { top: 105%; opacity: 0; }
     }
 
-    /* ESQUINAS TÁCTICAS BRILLANTES */
+    /* ESQUINAS MECANIZADAS */
     .corner {
       position: absolute;
       width: 16px;
@@ -139,7 +140,7 @@
     .corner.bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--pink); border-left: 2px solid var(--pink); }
     .corner.br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); }
 
-    /* BARRA SUPERIOR DE TELEMETRÍA Y LUCES LED */
+    /* BARRA DE LUCES LED PARPADEANTES */
     .telemetry-strip {
       display: flex;
       justify-content: space-between;
@@ -150,7 +151,7 @@
       letter-spacing: 1px;
       padding-bottom: 10px;
       margin-bottom: 14px;
-      border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
+      border-bottom: 1px dashed rgba(0, 240, 255, 0.22);
     }
 
     .led-cluster {
@@ -165,21 +166,20 @@
       border-radius: 50%;
       display: inline-block;
     }
-    .led.cyan { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: blinkFast 1.4s infinite; }
-    .led.pink { background: var(--pink); box-shadow: 0 0 8px var(--pink); animation: blinkSlow 2.2s infinite; }
-    .led.green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blinkFast 0.9s infinite alternate; }
-    .led.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: blinkSlow 3s infinite; }
+    .led.cyan { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: blinkFast 1.3s infinite; }
+    .led.pink { background: var(--pink); box-shadow: 0 0 8px var(--pink); animation: blinkSlow 2.1s infinite; }
+    .led.green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blinkFast 0.85s infinite alternate; }
+    .led.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: blinkSlow 2.8s infinite; }
 
     @keyframes blinkFast {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.2; transform: scale(0.85); }
+      50% { opacity: 0.18; transform: scale(0.8); }
     }
     @keyframes blinkSlow {
       0%, 70%, 100% { opacity: 1; }
-      35% { opacity: 0.15; }
+      35% { opacity: 0.12; }
     }
 
-    /* CABECERA PRINCIPAL */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -189,23 +189,23 @@
 
     .brand-group h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 900;
       margin: 0;
       letter-spacing: 2px;
       color: #fff;
-      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 2px 0 0 rgba(255, 0, 85, 0.5);
-      animation: neonFlicker 7s infinite;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.8), 2px 0 0 rgba(255, 0, 85, 0.6);
+      animation: neonFlicker 6s infinite;
     }
 
     @keyframes neonFlicker {
       0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.75), 2px 0 0 rgba(255, 0, 85, 0.55);
+        text-shadow: 0 0 12px rgba(0, 240, 255, 0.8), 2px 0 0 rgba(255, 0, 85, 0.6);
         opacity: 1;
       }
       20%, 24%, 55% {
         text-shadow: none;
-        opacity: 0.75;
+        opacity: 0.72;
       }
     }
 
@@ -214,14 +214,14 @@
       font-family: 'Share Tech Mono', monospace;
       font-size: 10px;
       color: var(--cyan);
-      letter-spacing: 2.8px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       margin-top: 2px;
     }
 
     .session-btn {
-      background: rgba(255, 0, 85, 0.1);
-      border: 1px solid rgba(255, 0, 85, 0.45);
+      background: rgba(255, 0, 85, 0.12);
+      border: 1px solid rgba(255, 0, 85, 0.5);
       color: #ff6699;
       font-family: 'Orbitron', sans-serif;
       font-size: 10px;
@@ -230,20 +230,19 @@
       border-radius: 8px;
       cursor: pointer;
       letter-spacing: 0.8px;
-      box-shadow: 0 0 12px rgba(255, 0, 85, 0.2);
-      transition: 0.25s;
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.25);
     }
-    .session-btn:hover, .session-btn.active {
-      background: rgba(255, 0, 85, 0.22);
+    .session-btn.active {
+      background: rgba(255, 0, 85, 0.28);
       border-color: var(--pink);
       color: #fff;
-      box-shadow: 0 0 18px rgba(255, 0, 85, 0.5);
+      box-shadow: 0 0 18px rgba(255, 0, 85, 0.55);
     }
 
     .session-panel {
       display: none;
-      background: rgba(3, 5, 12, 0.92);
-      border: 1px solid rgba(255, 0, 85, 0.4);
+      background: rgba(3, 5, 12, 0.94);
+      border: 1px solid rgba(255, 0, 85, 0.45);
       border-radius: 12px;
       padding: 10px;
       margin-bottom: 14px;
@@ -253,7 +252,7 @@
       width: 100%;
       height: 44px;
       background: #020306;
-      border: 1px solid rgba(0, 240, 255, 0.2);
+      border: 1px solid rgba(0, 240, 255, 0.25);
       color: var(--cyan);
       font-family: 'Share Tech Mono', monospace;
       border-radius: 6px;
@@ -263,7 +262,6 @@
       outline: none;
     }
 
-    /* BADGES DE PLATAFORMA */
     .badges-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -277,8 +275,8 @@
       font-weight: 800;
       padding: 6px 4px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.09);
       color: #5b7083;
       letter-spacing: 0.8px;
       transition: all 0.25s ease;
@@ -286,15 +284,13 @@
     .badge.active {
       border-color: var(--green);
       color: var(--green);
-      background: rgba(0, 255, 136, 0.12);
-      box-shadow: 0 0 14px rgba(0, 255, 136, 0.35), inset 0 0 8px rgba(0, 255, 136, 0.15);
-      transform: translateY(-1px);
+      background: rgba(0, 255, 136, 0.14);
+      box-shadow: 0 0 14px rgba(0, 255, 136, 0.4), inset 0 0 8px rgba(0, 255, 136, 0.15);
     }
 
-    /* CAJA DE ENTRADA DE URL */
     .input-wrapper {
       position: relative;
-      background: rgba(4, 7, 15, 0.9);
+      background: rgba(4, 7, 15, 0.92);
       border: 1.5px solid var(--border-cyan);
       border-radius: 12px;
       padding: 6px;
@@ -302,11 +298,10 @@
       align-items: center;
       margin-bottom: 14px;
       transition: all 0.25s ease;
-      box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.05);
     }
     .input-wrapper:focus-within {
       border-color: var(--green);
-      box-shadow: 0 0 18px rgba(0, 255, 136, 0.28), inset 0 0 10px rgba(0, 255, 136, 0.08);
+      box-shadow: 0 0 18px rgba(0, 255, 136, 0.3);
     }
     textarea#urlInput {
       flex: 1;
@@ -322,7 +317,7 @@
       width: 100%;
     }
     .btn-paste {
-      background: linear-gradient(180deg, rgba(0, 240, 255, 0.18), rgba(0, 240, 255, 0.06));
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.06));
       border: 1px solid var(--cyan);
       color: var(--cyan);
       font-family: 'Orbitron', sans-serif;
@@ -333,7 +328,6 @@
       cursor: pointer;
       white-space: nowrap;
       box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
-      transition: 0.2s;
     }
     .btn-paste:active {
       transform: scale(0.95);
@@ -341,7 +335,6 @@
       color: #000;
     }
 
-    /* SELECTORES DE CALIDAD Y MODO */
     .controls-grid {
       display: grid;
       grid-template-columns: 1.25fr 1fr;
@@ -349,8 +342,8 @@
       margin-bottom: 16px;
     }
     select, .mode-switcher {
-      background: rgba(4, 7, 15, 0.9);
-      border: 1px solid rgba(0, 240, 255, 0.22);
+      background: rgba(4, 7, 15, 0.92);
+      border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 10px;
       overflow: hidden;
       display: flex;
@@ -375,16 +368,14 @@
       font-size: 11px;
       font-weight: 800;
       cursor: pointer;
-      transition: 0.2s;
     }
     .mode-tab.active {
-      background: rgba(255, 0, 85, 0.22);
+      background: rgba(255, 0, 85, 0.24);
       color: #fff;
       border-bottom: 2px solid var(--pink);
       text-shadow: 0 0 8px var(--pink);
     }
 
-    /* BOTÓN DE EJECUCIÓN CYBERPUNK */
     .btn-execute {
       position: relative;
       width: 100%;
@@ -401,7 +392,6 @@
       letter-spacing: 1.8px;
       box-shadow: 0 0 25px rgba(0, 240, 255, 0.45);
       animation: gradientShift 4s ease infinite;
-      transition: transform 0.15s;
     }
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
@@ -416,11 +406,10 @@
       cursor: wait;
     }
 
-    /* TERMINAL DE ESTADO */
     .status-box {
       margin-top: 14px;
-      background: rgba(3, 6, 14, 0.92);
-      border: 1px solid rgba(0, 240, 255, 0.18);
+      background: rgba(3, 6, 14, 0.94);
+      border: 1px solid rgba(0, 240, 255, 0.2);
       border-left: 3px solid var(--cyan);
       border-radius: 10px;
       padding: 12px;
@@ -429,14 +418,12 @@
       font-size: 12px;
       color: #9cb8d0;
       word-break: break-word;
-      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
     }
 
-    /* TARJETA DE PREVISUALIZACIÓN Y DESCARGA */
     .preview-card {
       display: none;
       margin-top: 14px;
-      background: rgba(5, 9, 20, 0.94);
+      background: rgba(5, 9, 20, 0.95);
       border: 1px solid rgba(0, 255, 136, 0.45);
       border-radius: 12px;
       padding: 12px;
@@ -499,9 +486,10 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 0 18px rgba(255, 0, 85, 0.45);
+      display: block;
     }
     .pro-btn.alt {
-      background: rgba(0, 240, 255, 0.12);
+      background: rgba(0, 240, 255, 0.14);
       border: 1px solid var(--cyan);
       color: var(--cyan);
       box-shadow: none;
@@ -523,7 +511,6 @@
 </head>
 <body>
 
-  <!-- FONDO ANIMADO DE CASCADA DE CÓDIGO CYBERPUNK -->
   <canvas id="cyberCanvas"></canvas>
   <div class="cyber-grid"></div>
   <div class="scanlines"></div>
@@ -534,7 +521,6 @@
     <div class="corner bl"></div>
     <div class="corner br"></div>
 
-    <!-- BARRA DE LUCES LED Y TELEMETRÍA -->
     <div class="telemetry-strip">
       <div class="led-cluster">
         <span class="led green"></span>
@@ -543,19 +529,19 @@
         <span class="led yellow"></span>
         <span style="margin-left:4px; color:#00ff88;">SYS.NET // ONLINE</span>
       </div>
-      <div id="cyberClock">NODE: VERCEL-EDGE</div>
+      <div>HUD v4.0 // ACTIVE</div>
     </div>
 
     <div class="top-bar">
       <div class="brand-group">
         <h1>MILTICO TUBE</h1>
-        <span>CYBER STREAM ENGINE v3.0</span>
+        <span>CYBER STREAM ENGINE</span>
       </div>
-      <button class="session-btn" type="button" id="sessionBtn" onclick="toggleSession()">🔐 SESIÓN META</button>
+      <button class="session-btn" type="button" id="sessionBtn" onclick="window.toggleSession()">🔐 SESIÓN META</button>
     </div>
 
     <div class="session-panel" id="sessionPanel">
-      <div style="font-size:11px; color:#9cb8d0; margin-bottom:5px;">Cookie de Sesión (Opcional para Reels/Videos privados):</div>
+      <div style="font-size:11px; color:#9cb8d0; margin-bottom:5px;">Cookie de Sesión (Opcional para Reels privados):</div>
       <textarea id="cookieInput" placeholder="sessionid=...; c_user=..."></textarea>
     </div>
 
@@ -567,8 +553,8 @@
     </div>
 
     <div class="input-wrapper">
-      <textarea id="urlInput" placeholder="Pega el enlace aquí..." oninput="detectarPlataforma()"></textarea>
-      <button class="btn-paste" type="button" onclick="pegar()">PEGAR</button>
+      <textarea id="urlInput" placeholder="Pega el enlace aquí..." oninput="window.detectarPlataforma()"></textarea>
+      <button class="btn-paste" type="button" id="btnPaste" onclick="window.pegar()">PEGAR</button>
     </div>
 
     <div class="controls-grid">
@@ -578,12 +564,12 @@
         <option value="720">⚡ 720p Rápido</option>
       </select>
       <div class="mode-switcher">
-        <button class="mode-tab active" type="button" id="tabVid" onclick="setMode(false)">VÍDEO</button>
-        <button class="mode-tab" type="button" id="tabAud" onclick="setMode(true)">MP3</button>
+        <button class="mode-tab active" type="button" id="tabVid" onclick="window.setMode(false)">VÍDEO</button>
+        <button class="mode-tab" type="button" id="tabAud" onclick="window.setMode(true)">MP3</button>
       </div>
     </div>
 
-    <button class="btn-execute" type="button" id="btnExecute" onclick="procesarDescarga()">⚡ DESCARGAR ARCHIVO</button>
+    <button class="btn-execute" type="button" id="btnExecute" onclick="window.procesarDescarga()">⚡ DESCARGAR ARCHIVO</button>
 
     <div class="status-box" id="statusBox">
       SISTEMA EN LÍNEA // ESPERANDO ENLACE
@@ -603,16 +589,24 @@
   </div>
 
   <script>
-    // 1. Purgar cualquier Service Worker antiguo para evitar que se quede pegada la versión anterior
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        for (const reg of regs) reg.unregister();
-      }).catch(() => {});
-    }
+    // 1. Destruir cualquier caché o Service Worker antiguo que bloquee los botones
+    (async function clearOldCache() {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const reg of regs) await reg.unregister();
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (const key of keys) await caches.delete(key);
+        }
+      } catch (e) {}
+    })();
 
-    // 2. Animación Cyberpunk de Cascada de Código + Destellos de Luz en Canvas
+    // 2. Animación Cyberpunk de Cascada de Código en Canvas
     (function initCyberRain() {
       const canvas = document.getElementById('cyberCanvas');
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let width, height, columns, drops, colors, speeds;
       const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEF0123456789⚡';
@@ -625,27 +619,24 @@
         columns = Math.floor(width / fontSize);
         drops = Array.from({ length: columns }, () => Math.random() * -50);
         colors = Array.from({ length: columns }, () => palette[Math.floor(Math.random() * palette.length)]);
-        speeds = Array.from({ length: columns }, () => 0.4 + Math.random() * 0.85);
+        speeds = Array.from({ length: columns }, () => 0.45 + Math.random() * 0.85);
       }
 
       window.addEventListener('resize', resize);
       resize();
 
       function render() {
-        ctx.fillStyle = 'rgba(2, 3, 7, 0.1)';
+        ctx.fillStyle = 'rgba(2, 3, 7, 0.12)';
         ctx.fillRect(0, 0, width, height);
         ctx.font = '13px "Share Tech Mono", monospace';
 
         for (let i = 0; i < columns; i++) {
-          // Algunas columnas se mantienen apagadas para que sea elegante y no sature el fondo
           if (i % 2 !== 0 && i % 5 !== 0) continue;
-
           const char = chars[Math.floor(Math.random() * chars.length)];
           const x = i * 14;
           const y = drops[i] * 14;
 
-          // Destello brillante en la punta de la cascada
-          if (Math.random() > 0.88) {
+          if (Math.random() > 0.86) {
             ctx.fillStyle = '#ffffff';
             ctx.shadowBlur = 8;
             ctx.shadowColor = colors[i];
@@ -666,94 +657,148 @@
       render();
     })();
 
-    // 3. Lógica de la Interfaz
-    let isAudio = false;
+    // 3. Funciones Globales Ancladas a window para Máxima Compatibilidad Móvil
+    window.isAudio = false;
+    window.isProcessing = false;
 
-    function setMode(audio) {
-      isAudio = audio;
-      document.getElementById('tabVid').classList.toggle('active', !isAudio);
-      document.getElementById('tabAud').classList.toggle('active', isAudio);
-    }
+    window.setMode = function(audio) {
+      window.isAudio = audio;
+      document.getElementById('tabVid').classList.toggle('active', !audio);
+      document.getElementById('tabAud').classList.toggle('active', audio);
+    };
 
-    function toggleSession() {
+    window.toggleSession = function() {
       const p = document.getElementById('sessionPanel');
       const b = document.getElementById('sessionBtn');
       const open = p.style.display === 'block';
       p.style.display = open ? 'none' : 'block';
       b.classList.toggle('active', !open);
-    }
+    };
 
-    function detectarPlataforma() {
-      const val = document.getElementById('urlInput').value.toLowerCase();
+    window.detectarPlataforma = function() {
+      const val = (document.getElementById('urlInput').value || '').toLowerCase();
       document.getElementById('b-yt').classList.toggle('active', val.includes('youtu'));
       document.getElementById('b-tt').classList.toggle('active', val.includes('tiktok'));
       document.getElementById('b-ig').classList.toggle('active', val.includes('instagram'));
       document.getElementById('b-fb').classList.toggle('active', val.includes('facebook') || val.includes('fb.'));
-    }
+    };
 
-    async function pegar() {
+    window.pegar = async function() {
+      const input = document.getElementById('urlInput');
+      const status = document.getElementById('statusBox');
       try {
         const text = await navigator.clipboard.readText();
         const match = text.match(/https?:\/\/[^\s]+/);
-        document.getElementById('urlInput').value = match ? match[0] : text.trim();
-        detectarPlataforma();
-      } catch {
-        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro para pegar manualmente';
+        input.value = match ? match[0] : text.trim();
+        window.detectarPlataforma();
+        status.innerText = '✅ Enlace pegado. Toca DESCARGAR ARCHIVO.';
+      } catch (e) {
+        input.focus();
+        status.innerText = '⚠️ Mantén presionado el cuadro de texto y toca Pegar';
       }
-    }
+    };
 
-    function descargarTunel(url, ext) {
+    window.descargarArchivo = async function(url, ext) {
+      const status = document.getElementById('statusBox');
       let name = document.getElementById('customFilename').value.trim() || 'video.mp4';
       if (ext) name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + ext;
 
-      // Usa tu endpoint /api/stream si existe o abre descarga directa de respaldo
-      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
+      status.innerHTML = '<span class="spinner"></span> Iniciando transferencia al teléfono...';
+
+      // Intento 1: Descarga directa por Blob si CORS lo permite
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 6000);
+        const res = await fetch(url, { referrerPolicy: 'no-referrer', signal: ctrl.signal });
+        clearTimeout(tid);
+
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob.size > 1000) {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+            status.innerText = '✅ ¡Descarga completada en tu dispositivo!';
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // Intento 2: Abrir descarga directa del servidor CDN
       const a = document.createElement('a');
-      a.href = proxyUrl;
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       a.download = name;
       document.body.appendChild(a);
       a.click();
       a.remove();
-    }
+      status.innerText = '⚡ Descarga directa iniciada en el navegador';
+    };
 
-    async function procesarDescarga() {
+    window.procesarDescarga = async function() {
+      if (window.isProcessing) return;
+
       const input = document.getElementById('urlInput');
-      const url = (input.value || '').match(/https?:\/\/[^\s]+/)?.[0] || '';
+      const rawText = (input.value || '').trim();
+      const urlMatch = rawText.match(/https?:\/\/[^\s]+/);
+      const url = urlMatch ? urlMatch[0] : rawText;
+
       const quality = document.getElementById('qualitySelect').value;
-      const cookie = document.getElementById('cookieInput').value.trim();
+      const cookieEl = document.getElementById('cookieInput');
+      const cookie = cookieEl ? cookieEl.value.trim() : '';
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('previewCard');
       const btn = document.getElementById('btnExecute');
 
-      if (!url) {
-        status.innerText = '⚠️ Pega un enlace válido primero';
+      if (!url || !url.startsWith('http')) {
+        status.innerText = '⚠️ Pega un enlace válido que empiece con http:// o https://';
         return;
       }
 
+      window.isProcessing = true;
       preview.style.display = 'none';
       btn.disabled = true;
-      status.innerHTML = '<span class="spinner"></span> Extrayendo flujo en alta definición...';
+      status.innerHTML = '<span class="spinner"></span> Conectando con nodos de extracción...';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 18000);
 
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            url,
-            mode: isAudio ? 'audio' : 'auto',
-            quality,
-            cookie
-          })
+            url: url,
+            mode: window.isAudio ? 'audio' : 'auto',
+            quality: quality,
+            cookie: cookie
+          }),
+          signal: controller.signal
         });
 
-        const data = await res.json();
+        const textResponse = await res.text();
+        let data;
+        try {
+          data = JSON.parse(textResponse);
+        } catch (err) {
+          status.innerText = `❌ Error en servidor (${res.status}). Verifica que subiste api/download.js correctamente.`;
+          return;
+        }
 
-        if (res.ok && data.url) {
-          status.innerText = '✅ ¡Stream extraído con éxito!';
+        if (res.ok && data && data.url) {
+          status.innerText = '✅ ¡Stream extraído! Guardando...';
           preview.style.display = 'block';
           document.getElementById('videoTitle').innerText = data.title || 'Vídeo Extraído';
           document.getElementById('customFilename').value = data.filename || 'video.mp4';
-          document.getElementById('videoPreview').src = data.url;
+
+          const videoEl = document.getElementById('videoPreview');
+          videoEl.src = data.url;
 
           const actionContainer = document.getElementById('actionButtons');
           actionContainer.innerHTML = '';
@@ -762,17 +807,33 @@
           mainBtn.type = 'button';
           mainBtn.className = 'pro-btn';
           mainBtn.textContent = '⬇ GUARDAR EN EL TELÉFONO';
-          mainBtn.addEventListener('click', () => descargarTunel(data.url));
+          mainBtn.onclick = () => window.descargarArchivo(data.url);
           actionContainer.appendChild(mainBtn);
 
-          const directBtn = document.createElement('a');
-          directBtn.href = data.url;
-          directBtn.target = '_blank';
-          directBtn.rel = 'noopener noreferrer';
-          directBtn.className = 'pro-btn alt';
-          directBtn.textContent = '⚡ ABRIR STREAM DIRECTO (SI EL ARCHIVO ES GRANDE)';
-          actionContainer.appendChild(directBtn);
+          const directLink = document.createElement('a');
+          directLink.href = data.url;
+          directLink.target = '_blank';
+          directLink.rel = 'noopener noreferrer';
+          directLink.className = 'pro-btn alt';
+          directLink.textContent = '⚡ ABRIR ENLACE DIRECTO DEL VIDEO';
+          actionContainer.appendChild(directLink);
 
-          descargarTunel(data.url);
+          window.descargarArchivo(data.url);
         } else {
-          status.
+          status.innerText = '❌ ' + (data?.error || 'No se pudo extraer el vídeo');
+        }
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          status.innerText = '❌ Tiempo agotado (18s). El servidor externo tardó demasiado.';
+        } else {
+          status.innerText = '❌ Error de conexión: ' + (e.message || 'Verifica tu red');
+        }
+      } finally {
+        clearTimeout(timeoutId);
+        window.isProcessing = false;
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
