@@ -17,7 +17,6 @@ function limpiarNombre(texto, ext = 'mp4', quality = 'HD') {
   return `${nombreLimpio}_${quality}_${tag}.${ext}`;
 }
 
-// Decodificador seguro para evitar que JSON.parse lance SyntaxError en cadenas mal escapadas
 function decodeEscapedUrl(rawStr) {
   if (!rawStr) return null;
   try {
@@ -28,161 +27,301 @@ function decodeEscapedUrl(rawStr) {
       .replace(/\\u0026/g, '&')
       .replace(/\\u002F/gi, '/')
       .replace(/\\\//g, '/')
-      .replace(/\\/g, '');
+      .replace(/\\/g, '')
+      .replace(/&amp;/g, '&');
   }
 }
 
-// Envoltorio con AbortController para evitar que un servidor lento cause 504 Gateway Timeout en Vercel
 async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 4500, ...fetchOptions } = options;
+  const { timeout = 4200, ...fetchOptions } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(resource, {
+    return await fetch(resource, {
       ...fetchOptions,
       signal: controller.signal
     });
-    return response;
   } finally {
     clearTimeout(id);
   }
 }
 
 export default async function handler(req, res) {
-  // Configuración CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido. Usa POST.' });
-  }
+  let { url, mode = 'auto', quality = 'max', cookie = '' } = req.body || {};
+  if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
 
-  let { url, mode = 'auto', quality = 'max' } = req.body || {};
-  if (!url || typeof url !== 'string') {
-    return res.status(400).json({ error: 'Falta la URL del vídeo' });
-  }
-
-  // Validación estricta de URL para prevenir SSRF
-  let parsedUrl;
-  try {
-    parsedUrl = new URL(url.trim());
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      return res.status(400).json({ error: 'Protocolo de URL no válido' });
-    }
-  } catch {
-    return res.status(400).json({ error: 'El formato del enlace no es válido' });
-  }
-
-  const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
-  const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
+  const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+  const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36';
 
   const ext = mode === 'audio' ? 'mp3' : 'mp4';
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
-  // Limpieza de parámetros de seguimiento y resolución de redirecciones cortas con timeout
+  // Normalización y resolución de enlaces cortos
   try {
-    if (parsedUrl.hostname.includes('instagram.com')) {
-      url = `${parsedUrl.origin}${parsedUrl.pathname}`;
-    } else if (parsedUrl.hostname.includes('fb.watch') || url.includes('/share/')) {
+    if (url.includes('instagram.com')) {
+      url = url.split('?')[0];
+    } else if (url.includes('fb.watch') || url.includes('/share/') || url.includes('vt.tiktok.com') || url.includes('vm.tiktok.com')) {
       const redir = await fetchWithTimeout(url, {
-        method: 'HEAD',
+        method: 'GET',
         redirect: 'follow',
         headers: { 'User-Agent': uaMobile },
         timeout: 3000
       });
-      if (redir.url && redir.url.startsWith('http')) {
-        url = redir.url;
-      }
+      if (redir.url && redir.url.startsWith('http')) url = redir.url;
     }
-  } catch {
-    // Continúa con la URL original si falla la resolución de redirección
+  } catch {}
+
+  // ==========================================
+  // 1. MOTOR YOUTUBE (Multi-Instancia Rápida + oEmbed)
+  // ==========================================
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    let ytTitle = 'YouTube_Video';
+    let ytThumb = '';
+
+    // Obtener título y miniatura reales rápido
+    try {
+      const oembed = await fetchWithTimeout(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, { timeout: 2000 });
+      if (oembed.ok) {
+        const meta = await oembed.json();
+        ytTitle = meta.title || ytTitle;
+        ytThumb = meta.thumbnail_url || '';
+      }
+    } catch {}
+
+    const vQuality = quality === 'max' ? '1080' : String(quality);
+
+    // Lista de instancias compatibles (v7 y v10)
+    const cobaltNodes = [
+      { api: 'https://co.eepy.today/api/json', v10: false },
+      { api: 'https://cobalt-api.kwiatekmiki.com', v10: true },
+      { api: 'https://cobalt.api.timelessnesses.me', v10: true }
+    ];
+
+    for (const node of cobaltNodes) {
+      try {
+        const payload = node.v10
+          ? {
+              url,
+              videoQuality: vQuality,
+              audioFormat: 'mp3',
+              filenameStyle: 'pretty',
+              downloadMode: mode === 'audio' ? 'audio' : 'auto'
+            }
+          : {
+              url,
+              vQuality,
+              aFormat: 'mp3',
+              filenamePattern: 'pretty',
+              isAudioOnly: mode === 'audio'
+            };
+
+        const ytRes = await fetchWithTimeout(node.api, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': uaDesktop
+          },
+          body: JSON.stringify(payload),
+          timeout: 3800
+        });
+
+        if (ytRes.ok) {
+          const ytData = await ytRes.json();
+          const finalUrl = ytData.url || ytData.audio;
+          if (finalUrl) {
+            const title = ytData.filename || ytTitle;
+            return res.status(200).json({
+              url: finalUrl,
+              title,
+              thumb: ytThumb,
+              filename: limpiarNombre(title, ext, qLabel)
+            });
+          }
+        }
+      } catch {}
+    }
   }
 
   // ==========================================
-  // 1. RESOLUCIÓN DE METADATOS Y API EXTERNA CONFIGURADA
+  // 2. MOTOR TIKTOK (Sin marca de agua)
   // ==========================================
-  // Si configuras una variable de entorno MEDIA_API_ENDPOINT en tu panel de Vercel,
-  // se consultará con protección de timeout de 5 segundos.
-  if (process.env.MEDIA_API_ENDPOINT) {
+  if (url.includes('tiktok.com')) {
     try {
-      const apiRes = await fetchWithTimeout(process.env.MEDIA_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': uaDesktop
-        },
-        body: JSON.stringify({
-          url,
-          videoQuality: String(quality),
-          audioFormat: 'mp3',
-          downloadMode: mode === 'audio' ? 'audio' : 'auto'
-        }),
-        timeout: 5000
+      const ttRes = await fetchWithTimeout(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
+        headers: { 'User-Agent': uaMobile },
+        timeout: 4500
       });
+      const ttData = await ttRes.json();
+      if (ttData.code === 0 && ttData.data) {
+        const d = ttData.data;
+        const desc = d.title || d.author?.nickname || 'TikTok_Video';
+        const hdUrl = d.hdplay || d.play;
+        const sdUrl = d.play || d.wmplay;
+        const mp3Url = d.music;
 
-      if (apiRes.ok) {
-        const apiData = await apiRes.json();
-        const streamUrl = decodeEscapedUrl(apiData.url);
-        if (streamUrl) {
-          const title = apiData.title || apiData.filename || 'Video_Stream';
+        if (d.images && d.images.length > 0 && mode !== 'audio') {
           return res.status(200).json({
-            url: streamUrl,
+            url: d.images[0],
+            title: desc,
+            thumb: d.cover,
+            author: d.author?.nickname || 'TikTok',
+            filename: limpiarNombre(desc, 'jpg', 'Carrusel')
+          });
+        }
+
+        const chosenUrl = mode === 'audio' ? mp3Url : (quality === '720' ? sdUrl : hdUrl);
+        if (chosenUrl) {
+          return res.status(200).json({
+            url: chosenUrl,
+            title: desc,
+            thumb: d.cover,
+            author: d.author?.nickname || 'TikTok',
+            filename: limpiarNombre(desc, ext, qLabel)
+          });
+        }
+      }
+    } catch {}
+  }
+
+  // ==========================================
+  // 3. MOTOR INSTAGRAM REELS / POSTS
+  // ==========================================
+  if (url.includes('instagram.com')) {
+    try {
+      const igMatch = url.match(/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
+      if (igMatch) {
+        const shortcode = igMatch[1];
+        const headers = {
+          'User-Agent': uaDesktop,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+          'Sec-Fetch-Mode': 'navigate'
+        };
+        if (cookie) headers['Cookie'] = cookie;
+
+        const embedRes = await fetchWithTimeout(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
+          headers,
+          timeout: 4500
+        });
+        const html = await embedRes.text();
+
+        const videoMatch =
+          html.match(/"video_url":"([^"]+)"/) ||
+          html.match(/video_url\\?":\\?"([^"\\]+)/) ||
+          html.match(/property="og:video"\s+content="([^"]+)"/i);
+
+        const thumbMatch =
+          html.match(/"display_url":"([^"]+)"/) ||
+          html.match(/property="og:image"\s+content="([^"]+)"/i);
+
+        const captionMatch = html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/);
+
+        if (videoMatch && videoMatch[1]) {
+          const cleanVideoUrl = decodeEscapedUrl(videoMatch[1]);
+          const cleanThumb = thumbMatch ? decodeEscapedUrl(thumbMatch[1]) : '';
+          const rawCaption = captionMatch ? captionMatch[1].replace(/<[^>]+>/g, ' ').trim() : `Reel_${shortcode}`;
+
+          return res.status(200).json({
+            url: cleanVideoUrl,
+            title: rawCaption.slice(0, 90) || 'Instagram Reel',
+            thumb: cleanThumb,
+            author: 'Instagram',
+            filename: limpiarNombre(rawCaption, ext, qLabel)
+          });
+        }
+      }
+    } catch {}
+  }
+
+  // ==========================================
+  // 4. MOTOR FACEBOOK
+  // ==========================================
+  if (url.includes('facebook.com') || url.includes('fb.')) {
+    try {
+      const headers = {
+        'User-Agent': uaDesktop,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-Mode': 'navigate'
+      };
+      if (cookie) headers['Cookie'] = cookie;
+
+      const fbRes = await fetchWithTimeout(url, { headers, redirect: 'follow', timeout: 4500 });
+      const html = await fbRes.text();
+
+      const hdMatch =
+        html.match(/"browser_native_hd_url":"([^"]+)"/) ||
+        html.match(/"playable_url_quality_hd":"([^"]+)"/) ||
+        html.match(/hd_src\s*:\s*"([^"]+)"/);
+
+      const sdMatch =
+        html.match(/"browser_native_sd_url":"([^"]+)"/) ||
+        html.match(/"playable_url":"([^"]+)"/) ||
+        html.match(/sd_src\s*:\s*"([^"]+)"/) ||
+        html.match(/property="og:video"\s+content="([^"]+)"/i);
+
+      const titleMatch =
+        html.match(/property="og:description"\s+content="([^"]+)"/i) ||
+        html.match(/property="og:title"\s+content="([^"]+)"/i);
+
+      const hdUrl = hdMatch ? decodeEscapedUrl(hdMatch[1]) : null;
+      const sdUrl = sdMatch ? decodeEscapedUrl(sdMatch[1]) : null;
+      const bestFbUrl = quality === '720' ? (sdUrl || hdUrl) : (hdUrl || sdUrl);
+
+      if (bestFbUrl) {
+        const fbTitle = titleMatch ? titleMatch[1].replace(/\| Facebook|Facebook/gi, '').trim() : 'Video_de_Facebook';
+        return res.status(200).json({
+          url: bestFbUrl,
+          title: fbTitle,
+          author: 'Facebook',
+          filename: limpiarNombre(fbTitle, ext, qLabel)
+        });
+      }
+    } catch {}
+  }
+
+  // ==========================================
+  // 5. PASARELA UNIVERSAL DE RESPALDO (YouTube, Meta, TikTok)
+  // ==========================================
+  try {
+    const r = await fetchWithTimeout(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
+      headers: { 'User-Agent': uaMobile },
+      timeout: 5500
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const dlList = d?.data?.downloads || d?.downloads || [];
+      if (dlList.length > 0) {
+        // Priorizar formatos con audio+video (mp4) o el primero disponible
+        const best =
+          dlList.find(x => x.url && String(x.ext || x.format_id || '').includes('mp4')) ||
+          dlList.find(x => x.url) ||
+          dlList[0];
+
+        if (best && best.url) {
+          const title = d?.data?.title || d?.title || 'Video_Extraido';
+          return res.status(200).json({
+            url: best.url,
             title,
-            thumb: apiData.thumb || apiData.thumbnail || '',
+            thumb: d?.data?.thumbnail || d?.thumbnail || '',
             filename: limpiarNombre(title, ext, qLabel)
           });
         }
       }
-    } catch {
-      // Continúa al siguiente bloque si el servicio externo excede los 5s o falla
     }
-  }
-
-  // ==========================================
-  // 2. RESOLUCIÓN DE ENLACES DIRECTOS (.mp4 / .mp3 / .webm)
-  // ==========================================
-  if (/\.(mp4|webm|mp3|m4a)(\?.*)?$/i.test(parsedUrl.pathname)) {
-    const rawTitle = parsedUrl.pathname.split('/').pop()?.split('.')[0] || 'Media_Directo';
-    return res.status(200).json({
-      url: url,
-      title: decodeURIComponent(rawTitle),
-      thumb: '',
-      filename: limpiarNombre(rawTitle, ext, qLabel)
-    });
-  }
-
-  // ==========================================
-  // 3. CONSULTA DE METADATOS PÚBLICOS (oEmbed Oficial)
-  // ==========================================
-  if (parsedUrl.hostname.includes('youtube.com') || parsedUrl.hostname.includes('youtu.be')) {
-    try {
-      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-      const ytMetaRes = await fetchWithTimeout(oembedUrl, { timeout: 3500 });
-      if (ytMetaRes.ok) {
-        const ytMeta = await ytMetaRes.json();
-        return res.status(422).json({
-          error: 'Vídeo detectado correctamente via oEmbed, pero requiere un proveedor de streaming autorizado en MEDIA_API_ENDPOINT.',
-          meta: {
-            title: ytMeta.title,
-            author: ytMeta.author_name,
-            thumb: ytMeta.thumbnail_url,
-            suggestedFilename: limpiarNombre(ytMeta.title, ext, qLabel)
-          }
-        });
-      }
-    } catch {
-      // Manejo silencioso si oEmbed no responde a tiempo
-    }
-  }
+  } catch {}
 
   return res.status(500).json({
-    error: 'No se pudo obtener un flujo directo. Verifica que el enlace sea un recurso multimedia válido o configura tu endpoint en Vercel.'
+    error: 'No se pudo extraer el enlace en este momento. Verifica que el vídeo sea público e intenta nuevamente.'
   });
 }
