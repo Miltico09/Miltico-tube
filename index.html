@@ -75,29 +75,15 @@
       text-transform: uppercase;
       font-weight: 700;
     }
-    .session-btn {
-      background: rgba(0, 240, 255, 0.08);
-      border: 1px solid var(--border);
-      color: var(--blue);
-      font-size: 11px;
+    .status-pill {
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      color: var(--green);
+      font-size: 10px;
       font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Rajdhani', sans-serif;
-    }
-    .session-panel {
-      display: none;
-      background: #060812;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 14px;
-      font-size: 12px;
-    }
-    .session-panel textarea {
-      width: 100%; height: 45px; background: #020306; border: 1px solid #222;
-      color: #aaa; border-radius: 6px; padding: 6px; font-size: 11px; resize: none; outline: none;
+      padding: 5px 10px;
+      border-radius: 999px;
+      letter-spacing: 1px;
     }
     .badges-row {
       display: flex; gap: 6px; margin-bottom: 16px; justify-content: center;
@@ -105,6 +91,7 @@
     .badge {
       font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 12px;
       background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #6c7c8c;
+      transition: all 0.2s ease;
     }
     .badge.active { border-color: var(--green); color: var(--green); background: rgba(0, 255, 136, 0.1); }
 
@@ -138,18 +125,20 @@
       border: none; border-radius: 14px; cursor: pointer; letter-spacing: 1.5px;
       box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3); transition: 0.2s;
     }
-    .btn-execute:active { transform: scale(0.98); background: var(--green); }
+    .btn-execute:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-execute:active:not(:disabled) { transform: scale(0.98); background: var(--green); }
 
     .status-box {
       margin-top: 14px; background: #060812; border: 1px solid rgba(255, 255, 255, 0.05);
       border-left: 3px solid var(--blue); border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; color: #8a9cb0;
+      word-break: break-word;
     }
     .preview-card {
       display: none; margin-top: 14px; background: #070914; border: 1px solid rgba(0, 255, 136, 0.3);
       border-radius: 14px; padding: 12px; text-align: left;
     }
     .video-container { width: 100%; margin-bottom: 10px; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid var(--border); }
-    video { width: 100%; max-height: 200px; display: block; }
+    video { width: 100%; max-height: 220px; display: block; }
     .filename-tag {
       background: #020306; border: 1px dashed rgba(0, 240, 255, 0.3); border-radius: 8px;
       padding: 6px 10px; margin: 8px 0; font-size: 12px; color: var(--green); font-family: monospace; display: flex; align-items: center; gap: 6px;
@@ -162,7 +151,6 @@
       border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
     }
     .pro-btn.alt { background: rgba(0, 240, 255, 0.12); border: 1px solid var(--blue); color: var(--blue); box-shadow: none; }
-    .pro-btn.folder { background: rgba(0, 255, 136, 0.12); border: 1px solid var(--green); color: var(--green); box-shadow: none; }
     .spinner {
       display: inline-block; width: 14px; height: 14px; border: 2px solid var(--blue);
       border-bottom-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px;
@@ -178,12 +166,7 @@
         <h1>MILTICO TUBE</h1>
         <span>PRO STREAM ENGINE</span>
       </div>
-      <button class="session-btn" onclick="toggleSession()">🔐 SESIÓN META</button>
-    </div>
-
-    <div class="session-panel" id="sessionPanel">
-      <div style="font-size:11px; color:#8a9cba; margin-bottom:4px;">Pegar Cookie de Sesión (Opcional para Reels privados):</div>
-      <textarea id="cookieInput" placeholder="sessionid=... c_user=..."></textarea>
+      <div class="status-pill">ONLINE</div>
     </div>
 
     <div class="badges-row">
@@ -195,7 +178,7 @@
 
     <div class="input-wrapper">
       <textarea id="urlInput" placeholder="Pega el enlace aquí..." oninput="detectarPlataforma()"></textarea>
-      <button class="btn-paste" onclick="pegar()">PEGAR</button>
+      <button class="btn-paste" type="button" onclick="pegar()">PEGAR</button>
     </div>
 
     <div class="controls-grid">
@@ -205,12 +188,12 @@
         <option value="720">⚡ 720p Rápido</option>
       </select>
       <div class="mode-switcher">
-        <button class="mode-tab active" id="tabVid" onclick="setMode(false)">VÍDEO</button>
-        <button class="mode-tab" id="tabAud" onclick="setMode(true)">MP3</button>
+        <button class="mode-tab active" type="button" id="tabVid" onclick="setMode(false)">VÍDEO</button>
+        <button class="mode-tab" type="button" id="tabAud" onclick="setMode(true)">MP3</button>
       </div>
     </div>
 
-    <button class="btn-execute" onclick="procesarDescarga()">⚡ DESCARGAR ARCHIVO</button>
+    <button class="btn-execute" type="button" id="btnExecute" onclick="procesarDescarga()">⚡ PROCESAR ARCHIVO</button>
 
     <div class="status-box" id="statusBox">
       SISTEMA EN LÍNEA // ESPERANDO ENLACE
@@ -218,7 +201,7 @@
 
     <div class="preview-card" id="previewCard">
       <div class="video-container">
-        <video id="videoPreview" controls playsinline></video>
+        <video id="videoPreview" controls playsinline referrerpolicy="no-referrer"></video>
       </div>
       <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;" id="videoTitle">Título</div>
       <div class="filename-tag">
@@ -230,18 +213,16 @@
   </div>
 
   <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     let isAudio = false;
 
     function setMode(audio) {
       isAudio = audio;
       document.getElementById('tabVid').classList.toggle('active', !isAudio);
       document.getElementById('tabAud').classList.toggle('active', isAudio);
-    }
-
-    function toggleSession() {
-      const p = document.getElementById('sessionPanel');
-      p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
     function detectarPlataforma() {
@@ -258,30 +239,55 @@
         const match = text.match(/https?:\/\/[^\s]+/);
         document.getElementById('urlInput').value = match ? match[0] : text.trim();
         detectarPlataforma();
-      } catch (e) {
-        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro para pegar';
+      } catch {
+        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro de texto para pegar manualmente';
       }
     }
 
-    function descargarTunel(url, ext) {
+    // Descarga directa desde el navegador para evitar el límite de 4.5 MB de Vercel en /api/stream
+    async function descargarArchivo(url, extOverride) {
+      const status = document.getElementById('statusBox');
       let name = document.getElementById('customFilename').value.trim() || 'video.mp4';
-      if (ext) name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + ext;
-      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
-      const a = document.createElement('a');
-      a.href = proxyUrl;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      if (extOverride) {
+        name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + extOverride;
+      }
+
+      try {
+        status.innerHTML = '<span class="spinner"></span> Descargando flujo directo al dispositivo...';
+        const response = await fetch(url, { referrerPolicy: 'no-referrer' });
+        if (!response.ok) throw new Error('CORS restringido en origen');
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        status.innerText = '✅ ¡Archivo guardado en tu dispositivo!';
+      } catch {
+        // Fallback: abrir el stream directamente en el navegador sin pasar por el proxy Serverless de 4.5 MB
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        status.innerText = '⚡ Flujo abierto directamente para guardar';
+      }
     }
 
     async function procesarDescarga() {
       const input = document.getElementById('urlInput');
       const url = (input.value || '').match(/https?:\/\/[^\s]+/)?.[0] || '';
       const quality = document.getElementById('qualitySelect').value;
-      const cookie = document.getElementById('cookieInput').value.trim();
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('previewCard');
+      const btnExecute = document.getElementById('btnExecute');
 
       if (!url) {
         status.innerText = '⚠️ Pega un enlace válido primero';
@@ -289,38 +295,24 @@
       }
 
       preview.style.display = 'none';
-      status.innerHTML = '<span class="spinner"></span> Extrayendo flujo en alta definición...';
+      btnExecute.disabled = true;
+      status.innerHTML = '<span class="spinner"></span> Procesando enlace...';
+
+      const controller = new AbortController();
+      const clientTimeout = setTimeout(() => controller.abort(), 12000);
 
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, mode: isAudio ? 'audio' : 'auto', quality, cookie })
+          body: JSON.stringify({
+            url,
+            mode: isAudio ? 'audio' : 'auto',
+            quality
+          }),
+          signal: controller.signal
         });
-        const data = await res.json();
 
-        if (data.url) {
-          status.innerText = '✅ ¡Stream extraído con éxito!';
-          preview.style.display = 'block';
-          document.getElementById('videoTitle').innerText = data.title || 'Vídeo Extraído';
-          document.getElementById('customFilename').value = data.filename || 'video.mp4';
-          document.getElementById('videoPreview').src = data.url;
-
-          let html = `<button class="pro-btn" onclick="descargarTunel('${data.url}')">⬇ GUARDAR EN EL TELÉFONO</button>`;
-          if (data.formats && data.formats.length > 1) {
-            data.formats.forEach(f => {
-              html += `<button class="pro-btn alt" onclick="descargarTunel('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
-            });
-          }
-          document.getElementById('actionButtons').innerHTML = html;
-          descargarTunel(data.url);
-        } else {
-          status.innerText = '❌ ' + (data.error || 'No se pudo procesar el vídeo');
-        }
-      } catch (e) {
-        status.innerText = '❌ Error de red con el servidor';
-      }
-    }
-  </script>
-</body>
-</html>
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          status.inner
