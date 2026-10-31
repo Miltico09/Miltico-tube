@@ -1,0 +1,26 @@
+{
+  "name": "Cyber-DL Max Quality",
+  "short_name": "CyberDL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070c",
+  "theme_color": "#00f0ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/724/724933.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
