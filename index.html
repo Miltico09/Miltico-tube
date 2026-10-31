@@ -3,28 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#06060e">
+  <meta name="theme-color" content="#030408">
   <link rel="manifest" href="/manifest.json">
-  <title>MILTICO TUBE // MAX HUD</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>MILTICO TUBE // PRO HUD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #06060e;
-      --card: rgba(14, 15, 28, 0.94);
+      --bg: #030408;
+      --card: rgba(12, 14, 26, 0.85);
+      --border: rgba(0, 240, 255, 0.25);
       --blue: #00f0ff;
-      --red: #ff0055;
+      --pink: #ff0055;
       --green: #00ff88;
-      --text: #e2f1ff;
+      --text: #e2f8ff;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       background-color: var(--bg);
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.12) 0%, transparent 45%),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 25px 25px, 25px 25px;
+        radial-gradient(circle at 10% 10%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(255, 0, 85, 0.08) 0%, transparent 40%);
       color: var(--text);
       font-family: 'Rajdhani', sans-serif;
       display: flex;
@@ -33,401 +31,296 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      padding: 14px;
+      padding: 16px;
     }
-    .hud-card {
+    .hud-frame {
       background: var(--card);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(0, 240, 255, 0.35);
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 240, 255, 0.12);
-      border-radius: 18px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 240, 255, 0.03);
+      border-radius: 24px;
       width: 100%;
-      max-width: 460px;
-      padding: 20px 16px;
+      max-width: 440px;
+      padding: 24px 20px;
       position: relative;
       overflow: hidden;
     }
-    .hud-card::before {
+    .hud-frame::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
+      background: linear-gradient(90deg, var(--pink), var(--blue), var(--green));
     }
-    .header { text-align: center; margin-bottom: 12px; }
-    .brand {
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .brand-group h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 25px;
+      font-size: 22px;
       font-weight: 900;
-      letter-spacing: 2px;
       margin: 0;
-      background: linear-gradient(90deg, #fff, var(--blue), var(--green));
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #fff, var(--blue));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .subtitle {
-      font-size: 11px;
-      color: #8a99ad;
-      letter-spacing: 2.5px;
+    .brand-group span {
+      font-size: 10px;
+      color: #7a8c9e;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      margin-top: 3px;
-      font-weight: 600;
+      font-weight: 700;
     }
-    .badges { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .session-btn {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .session-panel {
+      display: none;
+      background: #060812;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+    .session-panel textarea {
+      width: 100%; height: 45px; background: #020306; border: 1px solid #222;
+      color: #aaa; border-radius: 6px; padding: 6px; font-size: 11px; resize: none; outline: none;
+    }
+    .badges-row {
+      display: flex; gap: 6px; margin-bottom: 16px; justify-content: center;
+    }
     .badge {
-      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-      background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #778899; transition: 0.25s;
+      font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #6c7c8c;
     }
-    .badge.active {
-      border-color: var(--green); color: var(--green);
-      background: rgba(0, 255, 136, 0.12); box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+    .badge.active { border-color: var(--green); color: var(--green); background: rgba(0, 255, 136, 0.1); }
+
+    .input-wrapper {
+      position: relative; background: #060812; border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 6px; display: flex; align-items: center; margin-bottom: 14px;
+      transition: all 0.3s ease;
     }
-    .input-box {
-      display: flex; align-items: center; background: #080912;
-      border: 1.5px solid rgba(0, 240, 255, 0.4); border-radius: 12px;
-      padding: 6px; margin-bottom: 10px; gap: 6px;
-    }
+    .input-wrapper:focus-within { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
     textarea {
       flex: 1; background: transparent; border: none; color: #fff;
       font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
-      padding: 6px 8px; outline: none; width: 100%; resize: none; height: 42px;
+      padding: 8px; outline: none; resize: none; height: 46px; width: 100%;
     }
-    .btn-clear { background: transparent; border: none; color: var(--red); font-size: 18px; font-weight: bold; padding: 0 6px; cursor: pointer; display: none; }
     .btn-paste {
-      background: rgba(0, 240, 255, 0.15); border: 1px solid var(--blue); color: var(--blue);
+      background: rgba(0, 240, 255, 0.12); border: 1px solid var(--blue); color: var(--blue);
       font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
-      padding: 10px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+      padding: 10px 12px; border-radius: 10px; cursor: pointer; white-space: nowrap;
     }
-    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 10px; }
-    .select-wrap, .mode-toggle {
-      background: #080912; border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px; display: flex; align-items: center; overflow: hidden;
+    .controls-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 14px; }
+    select, .mode-switcher {
+      background: #060812; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; overflow: hidden; display: flex; align-items: center;
     }
-    select {
-      width: 100%; background: #080912; color: var(--blue); border: none;
-      padding: 10px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; outline: none;
-    }
-    .mode-btn {
-      flex: 1; background: transparent; border: none; color: #6c7a89;
-      padding: 10px 4px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
-    }
-    .mode-btn.active { background: rgba(255, 0, 85, 0.2); color: #fff; border-bottom: 2px solid var(--red); }
-    
-    .advanced-toggle {
-      font-size: 12px; color: var(--blue); background: transparent; border: none;
-      cursor: pointer; text-align: left; padding: 4px 0; margin-bottom: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    }
-    .cookie-box { display: none; margin-bottom: 10px; background: #05060c; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 8px; }
-    .cookie-box textarea { height: 36px; font-size: 11px; color: #aaa; }
+    select { width: 100%; background: #060812; color: var(--blue); border: none; padding: 11px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; outline: none; }
+    .mode-tab { flex: 1; background: transparent; border: none; color: #6c7c8c; padding: 11px 4px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .mode-tab.active { background: rgba(255, 0, 85, 0.15); color: #fff; border-bottom: 2px solid var(--pink); }
 
-    .btn-main {
-      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--blue), #00a2ff);
-      color: #04050a; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900;
-      border: none; border-radius: 12px; cursor: pointer; letter-spacing: 1.5px;
-      box-shadow: 0 5px 20px rgba(0, 240, 255, 0.35);
+    .btn-execute {
+      width: 100%; padding: 15px; background: linear-gradient(135deg, var(--blue), #0088ff);
+      color: #030408; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900;
+      border: none; border-radius: 14px; cursor: pointer; letter-spacing: 1.5px;
+      box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3); transition: 0.2s;
     }
-    .status-panel {
-      margin-top: 12px; background: rgba(6, 7, 15, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid var(--blue);
-      border-radius: 10px; padding: 11px; text-align: center; font-size: 13px; font-weight: 600; color: #a0b2c6;
+    .btn-execute:active { transform: scale(0.98); background: var(--green); }
+
+    .status-box {
+      margin-top: 14px; background: #060812; border: 1px solid rgba(255, 255, 255, 0.05);
+      border-left: 3px solid var(--blue); border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; color: #8a9cb0;
     }
     .preview-card {
-      display: none; margin-top: 14px; background: #0a0b16;
-      border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 12px; padding: 12px; text-align: left;
+      display: none; margin-top: 14px; background: #070914; border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 14px; padding: 12px; text-align: left;
     }
-    .video-player-box {
-      width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden;
-      border: 1px solid rgba(0, 240, 255, 0.3); background: #000;
+    .video-container { width: 100%; margin-bottom: 10px; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid var(--border); }
+    video { width: 100%; max-height: 200px; display: block; }
+    .filename-tag {
+      background: #020306; border: 1px dashed rgba(0, 240, 255, 0.3); border-radius: 8px;
+      padding: 6px 10px; margin: 8px 0; font-size: 12px; color: var(--green); font-family: monospace; display: flex; align-items: center; gap: 6px;
     }
-    video { width: 100%; max-height: 220px; display: block; }
-    .preview-title { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 4px 0; }
-    .filename-box {
-      background: #05060c; border: 1px dashed rgba(0, 240, 255, 0.4);
-      border-radius: 8px; padding: 6px 10px; margin: 8px 0; font-size: 12px; color: var(--green);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .filename-box input {
-      flex: 1; background: transparent; border: none; color: var(--green);
-      font-family: monospace; font-size: 12px; outline: none;
-    }
-    .formats-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .dl-btn {
-      width: 100%; text-align: center; padding: 11px 10px; background: var(--red); color: #fff;
+    .filename-tag input { flex: 1; background: transparent; border: none; color: var(--green); font-family: monospace; font-size: 12px; outline: none; }
+    .action-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .pro-btn {
+      width: 100%; text-align: center; padding: 12px; background: var(--pink); color: #fff;
       text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
-      border-radius: 8px; border: none; cursor: pointer; display: block;
+      border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
     }
-    .dl-btn.alt { background: rgba(0, 240, 255, 0.14); border: 1px solid var(--blue); color: var(--blue); }
-    .dl-btn.folder { background: rgba(0, 255, 136, 0.14); border: 1px solid var(--green); color: var(--green); }
-    .loader {
+    .pro-btn.alt { background: rgba(0, 240, 255, 0.12); border: 1px solid var(--blue); color: var(--blue); box-shadow: none; }
+    .pro-btn.folder { background: rgba(0, 255, 136, 0.12); border: 1px solid var(--green); color: var(--green); box-shadow: none; }
+    .spinner {
       display: inline-block; width: 14px; height: 14px; border: 2px solid var(--blue);
-      border-bottom-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
-      vertical-align: middle; margin-right: 6px;
+      border-bottom-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <div class="hud-card">
-    <div class="header">
-      <h1 class="brand">MILTICO TUBE</h1>
-      <div class="subtitle">Multi-Link & Proxy Stream HUD</div>
-    </div>
-
-    <div class="badges">
-      <span class="badge" id="b-yt">▶ YOUTUBE</span>
-      <span class="badge" id="b-tt">♪ TIKTOK HD</span>
-      <span class="badge" id="b-ig">◈ REELS</span>
-      <span class="badge" id="b-fb">f FACEBOOK</span>
-      <span class="badge" id="b-batch">⚡ MULTI-LINK</span>
-    </div>
-
-    <div class="input-box">
-      <textarea id="videoUrl" placeholder="Pega links de FB, IG Reels, TikTok, YT..." oninput="detectarRed()"></textarea>
-      <button class="btn-clear" id="btnClear" onclick="limpiarInput()">✕</button>
-      <button class="btn-paste" onclick="pegar()">📋 PEGAR</button>
-    </div>
-
-    <button class="advanced-toggle" onclick="toggleCookieBox()">⚙️ [Opcional] Pegar Cookie de sesión para vídeos privados</button>
-    <div class="cookie-box" id="cookieBox">
-      <textarea id="cookieInput" placeholder="Pega tu cookie de IG/FB aquí si el vídeo es privado..."></textarea>
-    </div>
-
-    <div class="options-grid">
-      <div class="select-wrap">
-        <select id="qualitySelect">
-          <option value="max">🔥 CALIDAD: MAX (4K/1080p)</option>
-          <option value="1080">🎬 CALIDAD: 1080p HD</option>
-          <option value="720">⚡ CALIDAD: 720p Ligero</option>
-        </select>
+  <div class="hud-frame">
+    <div class="top-bar">
+      <div class="brand-group">
+        <h1>MILTICO TUBE</h1>
+        <span>PRO STREAM ENGINE</span>
       </div>
-      <div class="mode-toggle">
-        <button class="mode-btn active" id="modeVid" onclick="setMode(false)">🎬 VÍDEO</button>
-        <button class="mode-btn" id="modeAud" onclick="setMode(true)">🎵 MP3</button>
+      <button class="session-btn" onclick="toggleSession()">🔐 SESIÓN META</button>
+    </div>
+
+    <div class="session-panel" id="sessionPanel">
+      <div style="font-size:11px; color:#8a9cba; margin-bottom:4px;">Pegar Cookie de Sesión (Opcional para Reels privados):</div>
+      <textarea id="cookieInput" placeholder="sessionid=... c_user=..."></textarea>
+    </div>
+
+    <div class="badges-row">
+      <span class="badge" id="b-yt">YOUTUBE</span>
+      <span class="badge" id="b-tt">TIKTOK</span>
+      <span class="badge" id="b-ig">REELS</span>
+      <span class="badge" id="b-fb">FACEBOOK</span>
+    </div>
+
+    <div class="input-wrapper">
+      <textarea id="urlInput" placeholder="Pega el enlace aquí..." oninput="detectarPlataforma()"></textarea>
+      <button class="btn-paste" onclick="pegar()">PEGAR</button>
+    </div>
+
+    <div class="controls-grid">
+      <select id="qualitySelect">
+        <option value="max">🔥 MÁXIMA CALIDAD (4K/HD)</option>
+        <option value="1080">🎬 1080p Full HD</option>
+        <option value="720">⚡ 720p Rápido</option>
+      </select>
+      <div class="mode-switcher">
+        <button class="mode-tab active" id="tabVid" onclick="setMode(false)">VÍDEO</button>
+        <button class="mode-tab" id="tabAud" onclick="setMode(true)">MP3</button>
       </div>
     </div>
 
-    <button class="btn-main" onclick="procesarCola()">⚡ EXTRAER Y DESCARGAR</button>
+    <button class="btn-execute" onclick="procesarDescarga()">⚡ DESCARGAR ARCHIVO</button>
 
-    <div class="status-panel" id="status">
-      SISTEMA LISTO // LISTO PARA REELS Y FACEBOOK
+    <div class="status-box" id="statusBox">
+      SISTEMA EN LÍNEA // ESPERANDO ENLACE
     </div>
 
     <div class="preview-card" id="previewCard">
-      <div class="video-player-box" id="playerBox">
-        <video id="videoPreview" controls playsinline poster=""></video>
+      <div class="video-container">
+        <video id="videoPreview" controls playsinline></video>
       </div>
-
-      <p class="preview-title" id="prevTitle">Descripción del vídeo</p>
-      <div style="font-size:11px; color:var(--blue); margin-bottom:6px;" id="prevAuthor">@Autor</div>
-
-      <div class="filename-box">
-        <span>✏️</span>
-        <input type="text" id="customFilename" title="Nombre basado en la descripción (editable)" />
+      <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;" id="videoTitle">Título</div>
+      <div class="filename-tag">
+        <span>💾</span>
+        <input type="text" id="customFilename" />
       </div>
-
-      <div class="formats-list" id="actionBtns"></div>
+      <div class="action-grid" id="actionButtons"></div>
     </div>
   </div>
 
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
     let isAudio = false;
-    let currentThumb = '';
 
-    function setMode(audioMode) {
-      isAudio = audioMode;
-      document.getElementById('modeVid').classList.toggle('active', !isAudio);
-      document.getElementById('modeAud').classList.toggle('active', isAudio);
+    function setMode(audio) {
+      isAudio = audio;
+      document.getElementById('tabVid').classList.toggle('active', !isAudio);
+      document.getElementById('tabAud').classList.toggle('active', isAudio);
     }
 
-    function toggleCookieBox() {
-      const box = document.getElementById('cookieBox');
-      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    function toggleSession() {
+      const p = document.getElementById('sessionPanel');
+      p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    function extraerTodosLosLinks(texto) {
-      const matches = (texto || '').match(/https?:\/\/[^\s]+/g);
-      return matches ? matches : [];
-    }
-
-    function detectarRed() {
-      const val = document.getElementById('videoUrl').value.toLowerCase();
-      const links = extraerTodosLosLinks(val);
-      document.getElementById('btnClear').style.display = val.length > 0 ? 'block' : 'none';
+    function detectarPlataforma() {
+      const val = document.getElementById('urlInput').value.toLowerCase();
       document.getElementById('b-yt').classList.toggle('active', val.includes('youtu'));
       document.getElementById('b-tt').classList.toggle('active', val.includes('tiktok'));
       document.getElementById('b-ig').classList.toggle('active', val.includes('instagram'));
       document.getElementById('b-fb').classList.toggle('active', val.includes('facebook') || val.includes('fb.'));
-      document.getElementById('b-batch').classList.toggle('active', links.length > 1);
-    }
-
-    function limpiarInput() {
-      document.getElementById('videoUrl').value = '';
-      detectarRed();
-      const v = document.getElementById('videoPreview');
-      v.pause(); v.src = '';
-      document.getElementById('previewCard').style.display = 'none';
-      document.getElementById('status').innerText = 'COLA LIMPIA // ESPERANDO ENLACES';
     }
 
     async function pegar() {
       try {
         const text = await navigator.clipboard.readText();
-        const actual = document.getElementById('videoUrl').value.trim();
-        document.getElementById('videoUrl').value = actual ? (actual + '\n' + text) : text;
-        detectarRed();
+        const match = text.match(/https?:\/\/[^\s]+/);
+        document.getElementById('urlInput').value = match ? match[0] : text.trim();
+        detectarPlataforma();
       } catch (e) {
-        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro y toca Pegar';
+        document.getElementById('statusBox').innerText = 'Mantén presionado el cuadro para pegar';
       }
     }
 
-    function obtenerNombreActual(extOverride) {
-      let name = document.getElementById('customFilename').value.trim() || `Video_${Date.now()}.mp4`;
-      if (extOverride) {
-        name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + extOverride;
-      }
-      return name;
-    }
-
-    function descargarViaTunel(url, extOverride) {
-      const finalName = obtenerNombreActual(extOverride);
-      const status = document.getElementById('status');
-      status.innerHTML = `⏬ Guardando directo: <b>${finalName}</b>`;
-      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(finalName)}`;
+    function descargarTunel(url, ext) {
+      let name = document.getElementById('customFilename').value.trim() || 'video.mp4';
+      if (ext) name = name.replace(/\.[a-z0-9]+$/i, '') + '.' + ext;
+      const proxyUrl = `/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
       const a = document.createElement('a');
       a.href = proxyUrl;
-      a.download = finalName;
+      a.download = name;
       document.body.appendChild(a);
       a.click();
       a.remove();
     }
 
-    async function elegirCarpetaYGuardar(url) {
-      const status = document.getElementById('status');
-      const finalName = obtenerNombreActual();
-      try {
-        status.innerHTML = '<span class="loader"></span> Preparando archivo...';
-        const res = await fetch(`/api/stream?url=${encodeURIComponent(url)}&name=${encodeURIComponent(finalName)}`);
-        const blob = await res.blob();
+    async function procesarDescarga() {
+      const input = document.getElementById('urlInput');
+      const url = (input.value || '').match(/https?:\/\/[^\s]+/)?.[0] || '';
+      const quality = document.getElementById('qualitySelect').value;
+      const cookie = document.getElementById('cookieInput').value.trim();
+      const status = document.getElementById('statusBox');
+      const preview = document.getElementById('previewCard');
 
-        if (window.showSaveFilePicker) {
-          const handle = await window.showSaveFilePicker({ suggestedName: finalName });
-          const writable = await handle.createWritable();
-          await writable.write(blob);
-          await writable.close();
-          status.innerHTML = `✅ Guardado en tu carpeta: <b>${finalName}</b>`;
-          return;
-        }
-
-        const file = new File([blob], finalName, { type: blob.type || 'video/mp4' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: finalName });
-          status.innerHTML = `✅ Enviado a tu gestor de archivos`;
-          return;
-        }
-        descargarViaTunel(url);
-      } catch (e) {
-        descargarViaTunel(url);
-      }
-    }
-
-    function bajarPortada() {
-      if (!currentThumb) return;
-      const thumbName = obtenerNombreActual('jpg').replace(/_(MAX|1080p|720p|MP3)_/i, '_Portada_HD_');
-      const proxyUrl = `/api/stream?url=${encodeURIComponent(currentThumb)}&name=${encodeURIComponent(thumbName)}`;
-      const a = document.createElement('a');
-      a.href = proxyUrl;
-      a.download = thumbName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    async function procesarCola() {
-      const rawText = document.getElementById('videoUrl').value;
-      const links = extraerTodosLosLinks(rawText);
-      const status = document.getElementById('status');
-
-      if (!links.length) {
-        status.innerText = '⚠️ Pega al menos un enlace válido';
+      if (!url) {
+        status.innerText = '⚠️ Pega un enlace válido primero';
         return;
       }
 
-      for (let i = 0; i < links.length; i++) {
-        const prefix = links.length > 1 ? `[Cola ${i + 1}/${links.length}] ` : '';
-        await extraerUnico(links[i], prefix);
-        if (links.length > 1 && i < links.length - 1) {
-          await new Promise(r => setTimeout(r, 1500));
-        }
-      }
-    }
-
-    async function extraerUnico(cleanUrl, prefix = '') {
-      const quality = document.getElementById('qualitySelect').value;
-      const cookie = document.getElementById('cookieInput').value.trim();
-      const status = document.getElementById('status');
-      const preview = document.getElementById('previewCard');
-      const videoPlayer = document.getElementById('videoPreview');
-
-      status.innerHTML = `<span class="loader"></span> ${prefix}Analizando Reel / Vídeo...`;
+      preview.style.display = 'none';
+      status.innerHTML = '<span class="spinner"></span> Extrayendo flujo en alta definición...';
 
       try {
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: cleanUrl, mode: isAudio ? 'audio' : 'auto', quality, cookie })
+          body: JSON.stringify({ url, mode: isAudio ? 'audio' : 'auto', quality, cookie })
         });
         const data = await res.json();
 
         if (data.url) {
-          currentThumb = data.thumb || '';
-          status.innerText = `✅ ${prefix}¡Listo! Descargando: ${data.filename}`;
+          status.innerText = '✅ ¡Stream extraído con éxito!';
           preview.style.display = 'block';
-          document.getElementById('prevTitle').innerText = data.title || 'Vídeo Extraído';
-          document.getElementById('prevAuthor').innerText = data.author ? `@${data.author}` : 'Stream HD';
-          document.getElementById('customFilename').value = data.filename || `Video_HD_${Date.now()}.mp4`;
+          document.getElementById('videoTitle').innerText = data.title || 'Vídeo Extraído';
+          document.getElementById('customFilename').value = data.filename || 'video.mp4';
+          document.getElementById('videoPreview').src = data.url;
 
-          videoPlayer.poster = currentThumb;
-          videoPlayer.src = data.url;
-
-          const btns = document.getElementById('actionBtns');
-          let htmlBtns = `
-            <button class="dl-btn" onclick="descargarViaTunel('${data.url}')">⬇ DESCARGAR ARCHIVO (${quality.toUpperCase()})</button>
-            <div class="grid-2">
-              <button class="dl-btn folder" onclick="elegirCarpetaYGuardar('${data.url}')">📁 ELEGIR CARPETA</button>
-              ${currentThumb ? `<button class="dl-btn alt" onclick="bajarPortada()">🖼️ PORTADA HD</button>` : ''}
-            </div>
-          `;
-
+          let html = `<button class="pro-btn" onclick="descargarTunel('${data.url}')">⬇ GUARDAR EN EL TELÉFONO</button>`;
           if (data.formats && data.formats.length > 1) {
-            htmlBtns += `<div style="font-size:11px; color:#8a99ad; margin-top:6px;">CAMBIAR CALIDAD / FORMATO:</div>`;
             data.formats.forEach(f => {
-              htmlBtns += `<button class="dl-btn alt" onclick="descargarViaTunel('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
+              html += `<button class="pro-btn alt" onclick="descargarTunel('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
             });
           }
-
-          btns.innerHTML = htmlBtns;
-          descargarViaTunel(data.url);
+          document.getElementById('actionButtons').innerHTML = html;
+          descargarTunel(data.url);
         } else {
-          status.innerText = `❌ ${prefix}` + (data.error || 'Asegúrate de que la publicación sea pública.');
+          status.innerText = '❌ ' + (data.error || 'No se pudo procesar el vídeo');
         }
       } catch (e) {
-        status.innerText = `❌ ${prefix}Error de conexión con el servidor`;
+        status.innerText = '❌ Error de red con el servidor';
       }
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const shared = params.get('url') || params.get('text') || params.get('title') || '';
-      const links = extraerTodosLosLinks(shared);
-      if (links.length > 0) {
-        document.getElementById('videoUrl').value = links.join('\n');
-        detectarRed();
-        procesarCola();
-      }
-    });
   </script>
 </body>
 </html>
