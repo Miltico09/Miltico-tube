@@ -1,6 +1,9 @@
+// api/download.js
+
 function limpiarNombre(texto, ext = 'mp4', quality = 'HD') {
   const base = (texto || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/https?:\/\/[^\s]+/g, '')
     .replace(/#[a-zA-Z0-9_]+/g, '')
     .replace(/[^a-zA-Z0-9\s_-]/g, '')
@@ -10,181 +13,176 @@ function limpiarNombre(texto, ext = 'mp4', quality = 'HD') {
     .join('_');
 
   const tag = Math.floor(100 + Math.random() * 900);
-  const nombreLimpio = base.length > 2 ? base : `Video_Pro`;
+  const nombreLimpio = base.length > 2 ? base : 'Video_Pro';
   return `${nombreLimpio}_${quality}_${tag}.${ext}`;
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+// Decodificador seguro para evitar que JSON.parse lance SyntaxError en cadenas mal escapadas
+function decodeEscapedUrl(rawStr) {
+  if (!rawStr) return null;
+  try {
+    return JSON.parse(`"${rawStr.replace(/"/g, '\\"')}"`);
+  } catch {
+    return rawStr
+      .replace(/\\u0025/g, '%')
+      .replace(/\\u0026/g, '&')
+      .replace(/\\u002F/gi, '/')
+      .replace(/\\\//g, '/')
+      .replace(/\\/g, '');
+  }
+}
 
-  let { url, mode = 'auto', quality = 'max', cookie = '' } = req.body;
-  if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
+// Envoltorio con AbortController para evitar que un servidor lento cause 504 Gateway Timeout en Vercel
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 4500, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(resource, {
+      ...fetchOptions,
+      signal: controller.signal
+    });
+    return response;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+export default async function handler(req, res) {
+  // Configuración CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido. Usa POST.' });
+  }
+
+  let { url, mode = 'auto', quality = 'max' } = req.body || {};
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Falta la URL del vídeo' });
+  }
+
+  // Validación estricta de URL para prevenir SSRF
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url.trim());
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return res.status(400).json({ error: 'Protocolo de URL no válido' });
+    }
+  } catch {
+    return res.status(400).json({ error: 'El formato del enlace no es válido' });
+  }
 
   const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
   const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
 
-  try {
-    if (url.includes('instagram.com')) url = url.split('?')[0];
-    if (url.includes('fb.watch') || url.includes('/share/')) {
-      const redir = await fetch(url, { method: 'HEAD', redirect: 'follow', headers: { 'User-Agent': uaMobile } });
-      if (redir.url && redir.url.startsWith('http')) url = redir.url;
-    }
-  } catch (e) {}
-
   const ext = mode === 'audio' ? 'mp3' : 'mp4';
   const qLabel = mode === 'audio' ? 'MP3' : (quality === 'max' ? 'MAX' : `${quality}p`);
 
+  // Limpieza de parámetros de seguimiento y resolución de redirecciones cortas con timeout
+  try {
+    if (parsedUrl.hostname.includes('instagram.com')) {
+      url = `${parsedUrl.origin}${parsedUrl.pathname}`;
+    } else if (parsedUrl.hostname.includes('fb.watch') || url.includes('/share/')) {
+      const redir = await fetchWithTimeout(url, {
+        method: 'HEAD',
+        redirect: 'follow',
+        headers: { 'User-Agent': uaMobile },
+        timeout: 3000
+      });
+      if (redir.url && redir.url.startsWith('http')) {
+        url = redir.url;
+      }
+    }
+  } catch {
+    // Continúa con la URL original si falla la resolución de redirección
+  }
+
   // ==========================================
-  // 1. MOTOR YOUTUBE (Directo y Confiable)
+  // 1. RESOLUCIÓN DE METADATOS Y API EXTERNA CONFIGURADA
   // ==========================================
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+  // Si configuras una variable de entorno MEDIA_API_ENDPOINT en tu panel de Vercel,
+  // se consultará con protección de timeout de 5 segundos.
+  if (process.env.MEDIA_API_ENDPOINT) {
     try {
-      const ytRes = await fetch('https://co.eepy.today/api/json', {
+      const apiRes = await fetchWithTimeout(process.env.MEDIA_API_ENDPOINT, {
         method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'User-Agent': uaDesktop },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': uaDesktop
+        },
         body: JSON.stringify({
-          url: url,
+          url,
           videoQuality: String(quality),
           audioFormat: 'mp3',
-          filenameStyle: 'pretty',
           downloadMode: mode === 'audio' ? 'audio' : 'auto'
-        })
+        }),
+        timeout: 5000
       });
-      const ytData = await ytRes.json();
-      if (ytData.url) {
-        const title = ytData.filename || 'YouTube_Video';
-        return res.status(200).json({
-          url: ytData.url,
-          title,
-          thumb: '',
-          filename: limpiarNombre(title, ext, qLabel)
-        });
-      }
-    } catch (e) {}
-  }
 
-  // ==========================================
-  // 2. MOTOR TIKTOK (Sin marca de agua)
-  // ==========================================
-  if (url.includes('tiktok.com')) {
-    try {
-      const ttRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
-        headers: { 'User-Agent': uaMobile }
-      });
-      const ttData = await ttRes.json();
-      if (ttData.code === 0 && ttData.data) {
-        const d = ttData.data;
-        const desc = d.title || d.author?.nickname || 'TikTok_Video';
-        const hdUrl = d.hdplay || d.play;
-        const sdUrl = d.play || d.wmplay;
-        const mp3Url = d.music;
-
-        if (d.images && d.images.length > 0 && mode !== 'audio') {
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        const streamUrl = decodeEscapedUrl(apiData.url);
+        if (streamUrl) {
+          const title = apiData.title || apiData.filename || 'Video_Stream';
           return res.status(200).json({
-            url: d.images[0],
-            title: desc,
-            thumb: d.cover,
-            author: d.author?.nickname || 'TikTok',
-            filename: limpiarNombre(desc, 'jpg', 'Carrusel')
-          });
-        }
-
-        const chosenUrl = mode === 'audio' ? mp3Url : (quality === '720' ? sdUrl : hdUrl);
-        return res.status(200).json({
-          url: chosenUrl,
-          title: desc,
-          thumb: d.cover,
-          author: d.author?.nickname || 'TikTok',
-          filename: limpiarNombre(desc, ext, qLabel)
-        });
-      }
-    } catch (e) {}
-  }
-
-  // ==========================================
-  // 3. INSTAGRAM REELS
-  // ==========================================
-  if (url.includes('instagram.com')) {
-    try {
-      const igMatch = url.match(/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
-      if (igMatch) {
-        const shortcode = igMatch[1];
-        const headers = { 'User-Agent': uaDesktop, 'Accept-Language': 'es-ES,es;q=0.9' };
-        if (cookie) headers['Cookie'] = cookie;
-
-        const embedRes = await fetch(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, { headers });
-        const html = await embedRes.text();
-        const videoMatch = html.match(/"video_url":"([^"]+)"/) || html.match(/video_url\\?":\\?"([^"\\]+)/);
-        const thumbMatch = html.match(/"display_url":"([^"]+)"/);
-        const captionMatch = html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/);
-
-        if (videoMatch && videoMatch[1]) {
-          const cleanVideoUrl = videoMatch[1].replace(/\\u0026/g, '&').replace(/\\/g, '');
-          const cleanThumb = thumbMatch ? thumbMatch[1].replace(/\\u0026/g, '&').replace(/\\/g, '') : '';
-          const rawCaption = captionMatch ? captionMatch[1].replace(/<[^>]+>/g, ' ').trim() : `Reel_${shortcode}`;
-          return res.status(200).json({
-            url: cleanVideoUrl,
-            title: rawCaption.slice(0, 90) || `Instagram Reel`,
-            thumb: cleanThumb,
-            author: 'Instagram',
-            filename: limpiarNombre(rawCaption, ext, qLabel)
+            url: streamUrl,
+            title,
+            thumb: apiData.thumb || apiData.thumbnail || '',
+            filename: limpiarNombre(title, ext, qLabel)
           });
         }
       }
-    } catch (e) {}
-  }
-
-  // ==========================================
-  // 4. FACEBOOK
-  // ==========================================
-  if (url.includes('facebook.com') || url.includes('fb.')) {
-    try {
-      const headers = { 'User-Agent': uaDesktop, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
-      if (cookie) headers['Cookie'] = cookie;
-
-      const fbRes = await fetch(url, { headers, redirect: 'follow' });
-      const html = await fbRes.text();
-
-      const hdMatch = html.match(/"browser_native_hd_url":"([^"]+)"/) || html.match(/"playable_url_quality_hd":"([^"]+)"/) || html.match(/hd_src:"([^"]+)"/);
-      const sdMatch = html.match(/"browser_native_sd_url":"([^"]+)"/) || html.match(/"playable_url":"([^"]+)"/) || html.match(/sd_src:"([^"]+)"/);
-      const titleMatch = html.match(/property="og:description"\s+content="([^"]+)"/i) || html.match(/property="og:title"\s+content="([^"]+)"/i);
-
-      const hdUrl = hdMatch ? JSON.parse(`"${hdMatch[1]}"`).replace(/\\/g, '') : null;
-      const sdUrl = sdMatch ? JSON.parse(`"${sdMatch[1]}"`).replace(/\\/g, '') : null;
-      const bestFbUrl = quality === '720' ? (sdUrl || hdUrl) : (hdUrl || sdUrl);
-
-      if (bestFbUrl) {
-        const fbTitle = titleMatch ? titleMatch[1].replace(/\| Facebook|Facebook/gi, '').trim() : 'Video_de_Facebook';
-        return res.status(200).json({
-          url: bestFbUrl,
-          title: fbTitle,
-          author: 'Facebook',
-          filename: limpiarNombre(fbTitle, ext, qLabel)
-        });
-      }
-    } catch (e) {}
-  }
-
-  // ==========================================
-  // 5. PASARELA UNIVERSAL DE RESPALDO (Para cualquier plataforma)
-  // ==========================================
-  try {
-    const r = await fetch(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
-      headers: { 'User-Agent': uaMobile }
-    });
-    const d = await r.json();
-    const dlList = d?.data?.downloads || d?.downloads || [];
-    if (dlList.length > 0) {
-      const best = dlList.find(x => x.url) || dlList[0];
-      const title = d?.data?.title || d?.title || 'Video_Social';
-      return res.status(200).json({
-        url: best.url,
-        title,
-        thumb: d?.data?.thumbnail || d?.thumbnail || '',
-        filename: limpiarNombre(title, ext, qLabel)
-      });
+    } catch {
+      // Continúa al siguiente bloque si el servicio externo excede los 5s o falla
     }
-  } catch (e) {}
+  }
 
-  return res.status(500).json({ error: 'No se pudo procesar el enlace. Verifica que la publicación sea pública.' });
+  // ==========================================
+  // 2. RESOLUCIÓN DE ENLACES DIRECTOS (.mp4 / .mp3 / .webm)
+  // ==========================================
+  if (/\.(mp4|webm|mp3|m4a)(\?.*)?$/i.test(parsedUrl.pathname)) {
+    const rawTitle = parsedUrl.pathname.split('/').pop()?.split('.')[0] || 'Media_Directo';
+    return res.status(200).json({
+      url: url,
+      title: decodeURIComponent(rawTitle),
+      thumb: '',
+      filename: limpiarNombre(rawTitle, ext, qLabel)
+    });
+  }
+
+  // ==========================================
+  // 3. CONSULTA DE METADATOS PÚBLICOS (oEmbed Oficial)
+  // ==========================================
+  if (parsedUrl.hostname.includes('youtube.com') || parsedUrl.hostname.includes('youtu.be')) {
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+      const ytMetaRes = await fetchWithTimeout(oembedUrl, { timeout: 3500 });
+      if (ytMetaRes.ok) {
+        const ytMeta = await ytMetaRes.json();
+        return res.status(422).json({
+          error: 'Vídeo detectado correctamente via oEmbed, pero requiere un proveedor de streaming autorizado en MEDIA_API_ENDPOINT.',
+          meta: {
+            title: ytMeta.title,
+            author: ytMeta.author_name,
+            thumb: ytMeta.thumbnail_url,
+            suggestedFilename: limpiarNombre(ytMeta.title, ext, qLabel)
+          }
+        });
+      }
+    } catch {
+      // Manejo silencioso si oEmbed no responde a tiempo
+    }
+  }
+
+  return res.status(500).json({
+    error: 'No se pudo obtener un flujo directo. Verifica que el enlace sea un recurso multimedia válido o configura tu endpoint en Vercel.'
+  });
 }
