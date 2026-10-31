@@ -10,7 +10,7 @@
   <style>
     :root {
       --bg: #06060e;
-      --card: rgba(14, 15, 28, 0.88);
+      --card: rgba(14, 15, 28, 0.92);
       --blue: #00f0ff;
       --red: #ff0055;
       --green: #00ff88;
@@ -33,17 +33,17 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      padding: 16px;
+      padding: 14px;
     }
     .hud-card {
       background: var(--card);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(0, 240, 255, 0.35);
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.12);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 240, 255, 0.12);
       border-radius: 18px;
       width: 100%;
-      max-width: 440px;
-      padding: 24px 20px;
+      max-width: 450px;
+      padding: 22px 18px;
       position: relative;
       overflow: hidden;
     }
@@ -53,290 +53,102 @@
       top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
     }
-    .header {
-      text-align: center;
-      margin-bottom: 18px;
-    }
+    .header { text-align: center; margin-bottom: 14px; }
     .brand {
       font-family: 'Orbitron', sans-serif;
-      font-size: 26px;
+      font-size: 25px;
       font-weight: 900;
       letter-spacing: 2px;
       margin: 0;
       background: linear-gradient(90deg, #fff, var(--blue), var(--green));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
     }
     .subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: #8a99ad;
-      letter-spacing: 3px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 3px;
       font-weight: 600;
     }
-    .badges {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-    }
+    .badges { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
     .badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #778899;
-      transition: all 0.25s ease;
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #778899; transition: 0.25s;
     }
     .badge.active {
-      border-color: var(--green);
-      color: var(--green);
-      background: rgba(0, 255, 136, 0.12);
-      box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
-      transform: scale(1.05);
+      border-color: var(--green); color: var(--green);
+      background: rgba(0, 255, 136, 0.12); box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
     }
     .input-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-      background: #080912;
-      border: 1.5px solid rgba(0, 240, 255, 0.4);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 14px;
-      transition: all 0.25s;
-    }
-    .input-box:focus-within {
-      border-color: var(--green);
-      box-shadow: 0 0 15px rgba(0, 255, 136, 0.25);
+      display: flex; align-items: center; background: #080912;
+      border: 1.5px solid rgba(0, 240, 255, 0.4); border-radius: 12px;
+      padding: 4px; margin-bottom: 12px;
     }
     input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 12px 10px;
-      outline: none;
-      width: 100%;
+      flex: 1; background: transparent; border: none; color: #fff;
+      font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
+      padding: 11px 10px; outline: none; width: 100%;
     }
-    input::placeholder { color: #526075; }
-    .btn-clear {
-      background: transparent;
-      border: none;
-      color: #ff0055;
-      font-size: 18px;
-      font-weight: bold;
-      padding: 0 8px;
-      cursor: pointer;
-      display: none;
-    }
+    .btn-clear { background: transparent; border: none; color: var(--red); font-size: 18px; font-weight: bold; padding: 0 8px; cursor: pointer; display: none; }
     .btn-paste {
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid var(--blue);
-      color: var(--blue);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 10px 14px;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: 0.2s;
-      white-space: nowrap;
+      background: rgba(0, 240, 255, 0.15); border: 1px solid var(--blue); color: var(--blue);
+      font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+      padding: 10px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
     }
-    .btn-paste:active { background: var(--blue); color: #000; }
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
+    .options-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; margin-bottom: 14px; }
     .select-wrap, .mode-toggle {
-      background: #080912;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
+      background: #080912; border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px; display: flex; align-items: center; overflow: hidden;
     }
     select {
-      width: 100%;
-      background: #080912;
-      color: var(--blue);
-      border: none;
-      padding: 11px 12px;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      outline: none;
+      width: 100%; background: #080912; color: var(--blue); border: none;
+      padding: 10px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; outline: none;
     }
     .mode-btn {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: #6c7a89;
-      padding: 11px 6px;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
+      flex: 1; background: transparent; border: none; color: #6c7a89;
+      padding: 10px 4px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
     }
-    .mode-btn.active {
-      background: rgba(255, 0, 85, 0.18);
-      color: #fff;
-      border-bottom: 2px solid var(--red);
-    }
+    .mode-btn.active { background: rgba(255, 0, 85, 0.2); color: #fff; border-bottom: 2px solid var(--red); }
     .btn-main {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, var(--blue), #00a2ff);
-      color: #04050a;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 15px;
-      font-weight: 900;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--blue), #00a2ff);
+      color: #04050a; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900;
+      border: none; border-radius: 12px; cursor: pointer; letter-spacing: 1.5px;
       box-shadow: 0 5px 20px rgba(0, 240, 255, 0.35);
-      transition: all 0.2s;
-    }
-    .btn-main:active {
-      transform: scale(0.98);
-      background: linear-gradient(135deg, var(--green), var(--blue));
     }
     .status-panel {
-      margin-top: 18px;
-      background: rgba(6, 7, 15, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-left: 3px solid var(--blue);
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      color: #a0b2c6;
+      margin-top: 14px; background: rgba(6, 7, 15, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid var(--blue);
+      border-radius: 10px; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #a0b2c6;
     }
     .preview-card {
-      display: none;
-      margin-top: 14px;
-      background: #0a0b16;
-      border: 1px solid rgba(0, 255, 136, 0.35);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: left;
+      display: none; margin-top: 14px; background: #0a0b16;
+      border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 12px; padding: 12px; text-align: left;
     }
-    .preview-top {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .preview-thumb {
-      width: 72px;
-      height: 72px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 1px solid var(--blue);
-      background: #111;
-    }
+    .preview-top { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .preview-thumb { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--blue); }
     .preview-info { flex: 1; overflow: hidden; }
-    .preview-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      margin: 0 0 4px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    .preview-title { font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .filename-box {
+      background: #05060c; border: 1px dashed rgba(0, 240, 255, 0.35);
+      border-radius: 8px; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: var(--green);
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
     }
-    .preview-author {
-      font-size: 12px;
-      color: var(--green);
-      font-weight: 600;
-    }
-    .action-btns {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .filename-box input { padding: 2px; font-size: 12px; color: var(--green); font-family: monospace; }
+    .formats-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
     .dl-btn {
-      flex: 1;
-      text-align: center;
-      padding: 11px 12px;
-      background: var(--red);
-      color: #fff;
-      text-decoration: none;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+      width: 100%; text-align: center; padding: 11px 12px; background: var(--red); color: #fff;
+      text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+      border-radius: 8px; border: none; cursor: pointer; display: block;
     }
-    .dl-btn.secondary {
-      background: rgba(0, 240, 255, 0.12);
-      border: 1px solid var(--blue);
-      color: var(--blue);
-      box-shadow: none;
-    }
-    .history {
-      margin-top: 18px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 12px;
-      display: none;
-    }
-    .hist-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      color: var(--blue);
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-    .hist-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 8px 10px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-    .hist-item span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 210px;
-      color: #cbd5e1;
-    }
-    .hist-item a {
-      color: var(--green);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 12px;
-    }
+    .dl-btn.alt { background: rgba(0, 240, 255, 0.14); border: 1px solid var(--blue); color: var(--blue); }
+    .dl-btn.folder { background: rgba(0, 255, 136, 0.14); border: 1px solid var(--green); color: var(--green); }
     .loader {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--blue);
-      border-bottom-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
+      display: inline-block; width: 14px; height: 14px; border: 2px solid var(--blue);
+      border-bottom-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+      vertical-align: middle; margin-right: 6px;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
@@ -346,7 +158,7 @@
   <div class="hud-card">
     <div class="header">
       <h1 class="brand">MILTICO TUBE</h1>
-      <div class="subtitle">Max Resolution Streamer</div>
+      <div class="subtitle">Multi-Quality Stream Extractor</div>
     </div>
 
     <div class="badges">
@@ -357,7 +169,7 @@
     </div>
 
     <div class="input-box">
-      <input type="text" id="videoUrl" placeholder="Pega aquí el enlace del vídeo..." oninput="detectarRed()" />
+      <input type="text" id="videoUrl" placeholder="Pega link de FB, IG Reel, TikTok, YT..." oninput="detectarRed()" />
       <button class="btn-clear" id="btnClear" onclick="limpiarInput()">✕</button>
       <button class="btn-paste" onclick="pegar()">📋 PEGAR</button>
     </div>
@@ -365,9 +177,9 @@
     <div class="options-grid">
       <div class="select-wrap">
         <select id="qualitySelect">
-          <option value="max">🔥 MAX (4K / 1080p)</option>
-          <option value="1080">🎬 1080p Full HD</option>
-          <option value="720">⚡ 720p Rápido</option>
+          <option value="max">🔥 CALIDAD: MAX (4K/1080p)</option>
+          <option value="1080">🎬 CALIDAD: 1080p HD</option>
+          <option value="720">⚡ CALIDAD: 720p Ligero</option>
         </select>
       </div>
       <div class="mode-toggle">
@@ -376,33 +188,34 @@
       </div>
     </div>
 
-    <button class="btn-main" onclick="descargar()">⚡ DESCARGAR AHORA</button>
+    <button class="btn-main" onclick="descargar()">⚡ ANALIZAR Y DESCARGAR</button>
 
     <div class="status-panel" id="status">
-      SISTEMA EN LÍNEA // PEGA UN LINK PARA INICIAR
+      CARPETA PREFIJO: /Descargas/MilticoTube_...
     </div>
 
     <div class="preview-card" id="previewCard">
       <div class="preview-top">
         <img id="prevThumb" class="preview-thumb" src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="thumb" />
         <div class="preview-info">
-          <p class="preview-title" id="prevTitle">Vídeo Extraído</p>
-          <div class="preview-author" id="prevAuthor">Miltico Tube Engine</div>
+          <p class="preview-title" id="prevTitle">Descripción del vídeo</p>
+          <div style="font-size:11px; color:var(--blue);" id="prevAuthor">@MilticoTube</div>
         </div>
       </div>
-      <div class="action-btns" id="actionBtns"></div>
-    </div>
 
-    <div class="history" id="histBox">
-      <div class="hist-title">HISTORIAL RECIENTE</div>
-      <div id="histList"></div>
+      <div class="filename-box">
+        <span>📄</span>
+        <input type="text" id="customFilename" title="Puedes editar el nombre antes de guardar" />
+      </div>
+
+      <div class="formats-list" id="actionBtns"></div>
     </div>
   </div>
 
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-
     let isAudio = false;
+    let lastStreamUrl = '';
 
     function setMode(audioMode) {
       isAudio = audioMode;
@@ -428,7 +241,7 @@
       document.getElementById('videoUrl').value = '';
       detectarRed();
       document.getElementById('previewCard').style.display = 'none';
-      document.getElementById('status').innerText = 'SISTEMA EN LÍNEA // ESPERANDO ENLACE';
+      document.getElementById('status').innerText = 'LISTO PARA NUEVA EXTRACCIÓN';
     }
 
     async function pegar() {
@@ -437,51 +250,68 @@
         document.getElementById('videoUrl').value = limpiarUrl(text);
         detectarRed();
       } catch (e) {
-        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro de texto y toca Pegar';
+        document.getElementById('status').innerText = '⚠️ Mantén presionado el cuadro y toca Pegar';
       }
     }
 
-    async function forzarDescarga(url, filename) {
+    function obtenerNombreActual() {
+      return document.getElementById('customFilename').value.trim() || `MilticoTube_${Date.now()}.mp4`;
+    }
+
+    async function forzarDescarga(url, customExt) {
       const status = document.getElementById('status');
+      let finalName = obtenerNombreActual();
+      if (customExt && !finalName.endsWith(customExt)) {
+        finalName = finalName.replace(/\.[a-z0-9]+$/i, '') + '.' + customExt;
+      }
+
       try {
-        status.innerHTML = '<span class="loader"></span> Guardando archivo en tu galería/descargas...';
+        status.innerHTML = `<span class="loader"></span> Descargando <b>${finalName}</b>...`;
         const res = await fetch(url);
         const blob = await res.blob();
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = filename || (isAudio ? 'MilticoTube_Audio.mp3' : 'MilticoTube_Video.mp4');
+        a.download = finalName;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(blobUrl);
-        status.innerHTML = '✅ ¡Archivo descargado en tu dispositivo!';
+        status.innerHTML = `✅ Guardado como: <b>${finalName}</b>`;
       } catch (e) {
-        status.innerHTML = '✅ Redirigiendo al archivo directo...';
+        status.innerHTML = '✅ Abriendo descarga directa del servidor...';
         window.open(url, '_blank');
       }
     }
 
-    function guardarHistorial(titulo, urlDescarga) {
-      let hist = JSON.parse(localStorage.getItem('miltico_hist') || '[]');
-      hist.unshift({ title: titulo, url: urlDescarga, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-      hist = hist.slice(0, 5);
-      localStorage.setItem('miltico_hist', JSON.stringify(hist));
-      renderHistorial();
-    }
+    async function elegirCarpetaYGuardar(url) {
+      const status = document.getElementById('status');
+      const finalName = obtenerNombreActual();
+      try {
+        status.innerHTML = '<span class="loader"></span> Preparando archivo para carpeta MilticoTube...';
+        const res = await fetch(url);
+        const blob = await res.blob();
 
-    function renderHistorial() {
-      const hist = JSON.parse(localStorage.getItem('miltico_hist') || '[]');
-      const box = document.getElementById('histBox');
-      const list = document.getElementById('histList');
-      if (!hist.length) return;
-      box.style.display = 'block';
-      list.innerHTML = hist.map(h => `
-        <div class="hist-item">
-          <span>[${h.time}] ${h.title}</span>
-          <a href="${h.url}" target="_blank" download>⬇ BAJAR</a>
-        </div>
-      `).join('');
+        // Si el navegador soporta selector nativo de carpetas o menú Guardar En de Android
+        if (window.showSaveFilePicker) {
+          const handle = await window.showSaveFilePicker({ suggestedName: finalName });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          status.innerHTML = `✅ Guardado en tu carpeta elegida: <b>${finalName}</b>`;
+          return;
+        }
+
+        const file = new File([blob], finalName, { type: blob.type || 'video/mp4' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: finalName });
+          status.innerHTML = `✅ Archivo enviado a tu gestor de carpetas/galería`;
+          return;
+        }
+        forzarDescarga(url);
+      } catch (e) {
+        forzarDescarga(url);
+      }
     }
 
     async function descargar() {
@@ -495,12 +325,12 @@
       const preview = document.getElementById('previewCard');
 
       if (!cleanUrl.startsWith('http')) {
-        status.innerText = '⚠️ Por favor pega un enlace válido primero';
+        status.innerText = '⚠️ Pega un enlace válido de FB, IG, TikTok o YT';
         return;
       }
 
       preview.style.display = 'none';
-      status.innerHTML = '<span class="loader"></span> Extrayendo stream en máxima calidad...';
+      status.innerHTML = '<span class="loader"></span> Desencriptando enlace y calidades...';
 
       try {
         const res = await fetch('/api/download', {
@@ -510,38 +340,40 @@
         });
         const data = await res.json();
 
-        if (data.url || (data.picker && data.picker.length > 0)) {
-          status.innerText = '✅ ¡Stream obtenido con éxito!';
+        if (data.url) {
+          lastStreamUrl = data.url;
+          status.innerText = '✅ ¡Calidades y nombre generados!';
           preview.style.display = 'block';
-          document.getElementById('prevTitle').innerText = data.title || 'Vídeo en Máxima Calidad';
-          document.getElementById('prevAuthor').innerText = data.author ? `@${data.author}` : 'Miltico Tube Ready';
+          document.getElementById('prevTitle').innerText = data.title || 'Vídeo listo';
+          document.getElementById('prevAuthor').innerText = data.author || 'Miltico Tube';
           document.getElementById('prevThumb').src = data.thumb || 'https://cdn-icons-png.flaticon.com/512/724/724933.png';
+          document.getElementById('customFilename').value = data.filename || `MilticoTube_Video_${Date.now()}.mp4`;
 
           const btns = document.getElementById('actionBtns');
-          if (data.picker && data.picker.length > 0) {
-            btns.innerHTML = data.picker.map((item, i) => 
-              `<a class="dl-btn" href="${item.url}" target="_blank" download>⬇ ARCHIVO ${i+1}</a>`
-            ).join('');
-            guardarHistorial(data.title || 'Carrusel', data.picker[0].url);
-          } else {
-            const safeName = (data.filename || 'MilticoTube.mp4').replace(/'/g, '');
-            btns.innerHTML = `
-              <button class="dl-btn" onclick="forzarDescarga('${data.url}', '${safeName}')">⬇ GUARDAR EN TELÉFONO</button>
-              <a class="dl-btn secondary" href="${data.url}" target="_blank" download>🔗 ABRIR DIRECTO</a>
-            `;
-            guardarHistorial(data.title || 'Vídeo HD', data.url);
-            forzarDescarga(data.url, safeName);
+          let htmlBtns = `
+            <button class="dl-btn" onclick="forzarDescarga('${data.url}')">⬇ DESCARGA RÁPIDA (${quality.toUpperCase()})</button>
+            <button class="dl-btn folder" onclick="elegirCarpetaYGuardar('${data.url}')">📁 ELEGIR CARPETA / ENVIAR A GALERÍA</button>
+          `;
+
+          if (data.formats && data.formats.length > 1) {
+            htmlBtns += `<div style="font-size:11px; color:#8a99ad; margin-top:6px;">OTRAS CALIDADES DISPONIBLES:</div>`;
+            data.formats.forEach(f => {
+              htmlBtns += `<button class="dl-btn alt" onclick="forzarDescarga('${f.url}', '${f.ext || 'mp4'}')">${f.label}</button>`;
+            });
           }
+
+          btns.innerHTML = htmlBtns;
+          // Autodescarga inmediata con el nombre basado en la descripción
+          forzarDescarga(data.url);
         } else {
-          status.innerText = '❌ ' + (data.error || 'No se pudo extraer este vídeo');
+          status.innerText = '❌ ' + (data.error || 'No se pudo extraer este enlace');
         }
       } catch (e) {
-        status.innerText = '❌ Error de red. Verifica tu conexión e intenta de nuevo.';
+        status.innerText = '❌ Error de conexión con el servidor';
       }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderHistorial();
       const params = new URLSearchParams(window.location.search);
       const shared = params.get('url') || params.get('text') || params.get('title') || '';
       const clean = limpiarUrl(shared);
