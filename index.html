@@ -220,9 +220,9 @@
     }
 
     .session-btn {
-      background: rgba(255, 0, 85, 0.12);
-      border: 1px solid rgba(255, 0, 85, 0.5);
-      color: #ff6699;
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      color: var(--cyan);
       font-family: 'Orbitron', sans-serif;
       font-size: 10px;
       font-weight: 700;
@@ -230,36 +230,226 @@
       border-radius: 8px;
       cursor: pointer;
       letter-spacing: 0.8px;
-      box-shadow: 0 0 12px rgba(255, 0, 85, 0.25);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+      transition: all 0.2s ease;
     }
     .session-btn.active {
-      background: rgba(255, 0, 85, 0.28);
-      border-color: var(--pink);
-      color: #fff;
-      box-shadow: 0 0 18px rgba(255, 0, 85, 0.55);
+      background: rgba(0, 255, 136, 0.2);
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: 0 0 18px rgba(0, 255, 136, 0.4);
     }
 
-    .session-panel {
+    /* SECCIÓN DE CUENTAS ESTILO HUD */
+    .accounts-card {
       display: none;
-      background: rgba(3, 5, 12, 0.94);
-      border: 1px solid rgba(255, 0, 85, 0.45);
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 14px;
-      font-size: 12px;
+      background: rgba(4, 8, 18, 0.96);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.08);
+      animation: fadeIn 0.3s ease;
     }
-    .session-panel textarea {
-      width: 100%;
-      height: 44px;
-      background: #020306;
-      border: 1px solid rgba(0, 240, 255, 0.25);
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .accounts-header {
+      margin-bottom: 12px;
+    }
+    .accounts-header h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      margin: 0 0 2px 0;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .accounts-header p {
+      margin: 0;
+      font-size: 11px;
+      color: #8da4b5;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .account-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+    }
+    .account-row:last-of-type {
+      border-bottom: none;
+    }
+    .account-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .account-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .account-sub {
+      font-size: 11px;
+      color: #7b94a8;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .account-status {
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      color: #647d8f;
+    }
+    .account-status.connected {
+      color: var(--green);
+      text-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+    }
+    .account-btn {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+    }
+    .account-btn:active {
+      transform: scale(0.95);
+    }
+    .account-btn.logout {
+      border-color: rgba(255, 0, 85, 0.5);
+      color: #ff6699;
+      background: rgba(255, 0, 85, 0.1);
+    }
+
+    .cookies-import-bar {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(0, 240, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .import-btn {
+      background: transparent;
+      border: 1px dashed var(--cyan);
       color: var(--cyan);
       font-family: 'Share Tech Mono', monospace;
-      border-radius: 6px;
-      padding: 6px;
       font-size: 11px;
-      resize: none;
+      padding: 7px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* MODAL DE CONEXIÓN */
+    .hud-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .hud-modal-overlay.active {
+      display: flex;
+    }
+    .hud-modal {
+      position: relative;
+      background: #050813;
+      border: 1.5px solid var(--cyan);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.35);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 410px;
+      padding: 20px;
+      animation: modalZoom 0.25s ease-out;
+    }
+    @keyframes modalZoom {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .hud-modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1.2px;
+      margin: 0 0 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .close-modal {
+      background: transparent;
+      border: none;
+      color: #7b94a8;
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .hud-modal-desc {
+      font-size: 11px;
+      color: #8da4b5;
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .hud-modal textarea {
+      width: 100%;
+      height: 80px;
+      background: #020306;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 8px;
       outline: none;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    .hud-modal textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-save-token {
+      background: linear-gradient(90deg, #00f0ff, #00ff88);
+      color: #000;
+      border: none;
+    }
+    .btn-cancel-modal {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
     }
 
     .badges-row {
@@ -537,12 +727,76 @@
         <h1>MILTICO TUBE</h1>
         <span>CYBER STREAM ENGINE</span>
       </div>
-      <button class="session-btn" type="button" id="sessionBtn" onclick="window.toggleSession()">🔐 SESIÓN META</button>
+      <button class="session-btn" type="button" id="sessionBtn" onclick="window.toggleAccounts()">🔐 CUENTAS</button>
     </div>
 
-    <div class="session-panel" id="sessionPanel">
-      <div style="font-size:11px; color:#9cb8d0; margin-bottom:5px;">Cookie de Sesión (Opcional para Reels privados):</div>
-      <textarea id="cookieInput" placeholder="sessionid=...; c_user=..."></textarea>
+    <!-- PANEL DE CUENTAS / SESIONES ESTILO REFERENCIA -->
+    <div class="accounts-card" id="accountsCard">
+      <div class="accounts-header">
+        <h3>Cuentas</h3>
+        <p>Opcional. Solo para vídeos que piden iniciar sesión. No guardamos información de credenciales, solo el token temporal de sesión.</p>
+      </div>
+
+      <div class="account-row">
+        <div class="account-info">
+          <span class="account-name">YouTube</span>
+          <span class="account-sub">Para vídeos restringidos o de miembros</span>
+          <span class="account-status" id="status-youtube">Desconectada</span>
+        </div>
+        <button class="account-btn" type="button" id="btn-youtube" onclick="window.abrirModalConexion('youtube')">Conectar</button>
+      </div>
+
+      <div class="account-row">
+        <div class="account-info">
+          <span class="account-name">Instagram</span>
+          <span class="account-sub">Reels, historias y publicaciones</span>
+          <span class="account-status" id="status-instagram">Desconectada</span>
+        </div>
+        <button class="account-btn" type="button" id="btn-instagram" onclick="window.abrirModalConexion('instagram')">Conectar</button>
+      </div>
+
+      <div class="account-row">
+        <div class="account-info">
+          <span class="account-name">Facebook</span>
+          <span class="account-sub">Grupos y perfiles privados</span>
+          <span class="account-status" id="status-facebook">Desconectada</span>
+        </div>
+        <button class="account-btn" type="button" id="btn-facebook" onclick="window.abrirModalConexion('facebook')">Conectar</button>
+      </div>
+
+      <div class="account-row">
+        <div class="account-info">
+          <span class="account-name">X / Twitter</span>
+          <span class="account-sub">Videos marcados como sensibles</span>
+          <span class="account-status" id="status-twitter">Desconectada</span>
+        </div>
+        <button class="account-btn" type="button" id="btn-twitter" onclick="window.abrirModalConexion('twitter')">Conectar</button>
+      </div>
+
+      <div class="cookies-import-bar">
+        <input type="file" id="fileCookieInput" accept=".txt,.json" style="display:none;" onchange="window.importarCookiesArchivo(event)" />
+        <button class="import-btn" type="button" onclick="document.getElementById('fileCookieInput').click()">
+          📋 Importar cookies.txt
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL DE CONEXIÓN CON TOKEN / COOKIE -->
+    <div class="hud-modal-overlay" id="hudModalOverlay">
+      <div class="hud-modal">
+        <div class="hud-modal-title">
+          <span id="modalPlatformTitle">INICIAR SESIÓN</span>
+          <button class="close-modal" type="button" onclick="window.cerrarModalConexion()">✕</button>
+        </div>
+        <div class="hud-modal-desc" id="modalPlatformDesc">
+          Pega el token de sesión o cookie. No se guardará información personal ni contraseñas, solo el token de la sesión activa en tu navegador.
+        </div>
+        <textarea id="modalTokenInput" placeholder="Pega aquí el token o cookie de sesión (ej: sessionid=... / c_user=... / __Secure-3PSID=...)"></textarea>
+        <div class="modal-actions">
+          <button class="btn-cancel-modal" type="button" onclick="window.cerrarModalConexion()">CANCELAR</button>
+          <button class="btn-save-token" type="button" onclick="window.guardarTokenModal()">CONECTAR</button>
+        </div>
+      </div>
     </div>
 
     <div class="badges-row">
@@ -660,19 +914,209 @@
     // 3. Funciones Globales Ancladas a window para Máxima Compatibilidad Móvil
     window.isAudio = false;
     window.isProcessing = false;
+    window.currentPlatformModal = null;
+
+    // Almacenamiento en memoria de sesión volátil (no guardamos información personal)
+    window.sessionTokens = {
+      youtube: sessionStorage.getItem('token_youtube') || '',
+      instagram: sessionStorage.getItem('token_instagram') || '',
+      facebook: sessionStorage.getItem('token_facebook') || '',
+      twitter: sessionStorage.getItem('token_twitter') || ''
+    };
+
+    window.actualizarUIConexiones = function() {
+      const plataformas = ['youtube', 'instagram', 'facebook', 'twitter'];
+      let algunaConectada = false;
+
+      plataformas.forEach(p => {
+        const hasToken = !!window.sessionTokens[p];
+        const statusEl = document.getElementById(`status-${p}`);
+        const btnEl = document.getElementById(`btn-${p}`);
+
+        if (statusEl && btnEl) {
+          if (hasToken) {
+            algunaConectada = true;
+            statusEl.textContent = 'Conectada ✅';
+            statusEl.classList.add('connected');
+            btnEl.textContent = 'Salir';
+            btnEl.classList.add('logout');
+            btnEl.onclick = () => window.desconectarPlataforma(p);
+          } else {
+            statusEl.textContent = 'Desconectada';
+            statusEl.classList.remove('connected');
+            btnEl.textContent = 'Conectar';
+            btnEl.classList.remove('logout');
+            btnEl.onclick = () => window.abrirModalConexion(p);
+          }
+        }
+      });
+
+      const sessionBtn = document.getElementById('sessionBtn');
+      if (sessionBtn) {
+        sessionBtn.classList.toggle('active', algunaConectada);
+      }
+    };
+
+    window.toggleAccounts = function() {
+      const card = document.getElementById('accountsCard');
+      const open = card.style.display === 'block';
+      card.style.display = open ? 'none' : 'block';
+    };
+
+    window.abrirModalConexion = function(platform) {
+      window.currentPlatformModal = platform;
+      const overlay = document.getElementById('hudModalOverlay');
+      const title = document.getElementById('modalPlatformTitle');
+      const desc = document.getElementById('modalPlatformDesc');
+      const input = document.getElementById('modalTokenInput');
+
+      const nombres = {
+        youtube: 'YOUTUBE',
+        instagram: 'INSTAGRAM',
+        facebook: 'FACEBOOK',
+        twitter: 'X / TWITTER'
+      };
+
+      const pistas = {
+        youtube: 'Pega tu token o cookie de YouTube (ej: LOGIN_INFO=... o __Secure-3PSID=...) para vídeos con restricción.',
+        instagram: 'Pega tu cookie de sesión de Instagram (ej: sessionid=...; ds_user_id=...) para Reels o historias.',
+        facebook: 'Pega tu cookie de sesión de Facebook (ej: c_user=...; xs=...) para vídeos de grupos o privados.',
+        twitter: 'Pega tu cookie auth_token=... o ct0=... de X/Twitter para vídeos restringidos.'
+      };
+
+      title.textContent = `INICIAR SESIÓN // ${nombres[platform] || platform.toUpperCase()}`;
+      desc.textContent = pistas[platform] || 'Pega el token de sesión. Solo se usará en memoria para tus descargas de esta sesión.';
+      input.value = window.sessionTokens[platform] || '';
+      overlay.classList.add('active');
+      input.focus();
+    };
+
+    window.cerrarModalConexion = function() {
+      const overlay = document.getElementById('hudModalOverlay');
+      overlay.classList.remove('active');
+      window.currentPlatformModal = null;
+    };
+
+    window.guardarTokenModal = function() {
+      if (!window.currentPlatformModal) return;
+      const input = document.getElementById('modalTokenInput');
+      const val = (input.value || '').trim();
+      const p = window.currentPlatformModal;
+
+      if (val) {
+        window.sessionTokens[p] = val;
+        sessionStorage.setItem(`token_${p}`, val);
+      } else {
+        delete window.sessionTokens[p];
+        sessionStorage.removeItem(`token_${p}`);
+      }
+
+      window.cerrarModalConexion();
+      window.actualizarUIConexiones();
+      const status = document.getElementById('statusBox');
+      status.innerText = `Token de sesión para ${p.toUpperCase()} actualizado en memoria.`;
+    };
+
+    window.desconectarPlataforma = function(platform) {
+      window.sessionTokens[platform] = '';
+      sessionStorage.removeItem(`token_${platform}`);
+      window.actualizarUIConexiones();
+      const status = document.getElementById('statusBox');
+      status.innerText = `Sesión de ${platform.toUpperCase()} cerrada.`;
+    };
+
+    // Parser para importar cookies.txt en formato Netscape o JSON
+    window.importarCookiesArchivo = function(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const content = e.target.result;
+          let parsedAny = false;
+
+          // Intento parsear como JSON si corresponde
+          if (content.trim().startsWith('[') || content.trim().startsWith('{')) {
+            try {
+              const data = JSON.parse(content);
+              const list = Array.isArray(data) ? data : (data.cookies || []);
+              const byDomain = { youtube: [], instagram: [], facebook: [], twitter: [] };
+
+              list.forEach(c => {
+                const dom = (c.domain || '').toLowerCase();
+                const str = `${c.name}=${c.value}`;
+                if (dom.includes('youtube') || dom.includes('google')) byDomain.youtube.push(str);
+                else if (dom.includes('instagram')) byDomain.instagram.push(str);
+                else if (dom.includes('facebook')) byDomain.facebook.push(str);
+                else if (dom.includes('twitter') || dom.includes('x.com')) byDomain.twitter.push(str);
+              });
+
+              Object.keys(byDomain).forEach(key => {
+                if (byDomain[key].length > 0) {
+                  const cookieStr = byDomain[key].join('; ');
+                  window.sessionTokens[key] = cookieStr;
+                  sessionStorage.setItem(`token_${key}`, cookieStr);
+                  parsedAny = true;
+                }
+              });
+            } catch (err) {}
+          }
+
+          // Si no es JSON o falló, procesar formato Netscape cookies.txt
+          if (!parsedAny) {
+            const lines = content.split('\n');
+            const byDomain = { youtube: [], instagram: [], facebook: [], twitter: [] };
+
+            lines.forEach(line => {
+              line = line.trim();
+              if (!line || line.startsWith('#')) return;
+              const parts = line.split('\t');
+              if (parts.length >= 7) {
+                const domain = parts[0].toLowerCase();
+                const name = parts[5];
+                const val = parts[6];
+                const cookieStr = `${name}=${val}`;
+
+                if (domain.includes('youtube') || domain.includes('.google.com')) byDomain.youtube.push(cookieStr);
+                else if (domain.includes('instagram.com')) byDomain.instagram.push(cookieStr);
+                else if (domain.includes('facebook.com')) byDomain.facebook.push(cookieStr);
+                else if (domain.includes('twitter.com') || domain.includes('x.com')) byDomain.twitter.push(cookieStr);
+              }
+            });
+
+            Object.keys(byDomain).forEach(key => {
+              if (byDomain[key].length > 0) {
+                const cookieStr = byDomain[key].join('; ');
+                window.sessionTokens[key] = cookieStr;
+                sessionStorage.setItem(`token_${key}`, cookieStr);
+                parsedAny = true;
+              }
+            });
+          }
+
+          window.actualizarUIConexiones();
+          const status = document.getElementById('statusBox');
+          if (parsedAny) {
+            status.innerText = '✅ Cookies importadas y sincronizadas en la sesión activa.';
+          } else {
+            status.innerText = '⚠️ No se encontraron cookies compatibles en el archivo.';
+          }
+        } catch (err) {
+          document.getElementById('statusBox').innerText = '❌ Error al leer el archivo de cookies.';
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    };
+
+    // Inicializar UI de conexiones
+    window.actualizarUIConexiones();
 
     window.setMode = function(audio) {
       window.isAudio = audio;
       document.getElementById('tabVid').classList.toggle('active', !audio);
       document.getElementById('tabAud').classList.toggle('active', audio);
-    };
-
-    window.toggleSession = function() {
-      const p = document.getElementById('sessionPanel');
-      const b = document.getElementById('sessionBtn');
-      const open = p.style.display === 'block';
-      p.style.display = open ? 'none' : 'block';
-      b.classList.toggle('active', !open);
     };
 
     window.detectarPlataforma = function() {
@@ -750,8 +1194,6 @@
       const url = urlMatch ? urlMatch[0] : rawText;
 
       const quality = document.getElementById('qualitySelect').value;
-      const cookieEl = document.getElementById('cookieInput');
-      const cookie = cookieEl ? cookieEl.value.trim() : '';
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('previewCard');
       const btn = document.getElementById('btnExecute');
@@ -770,6 +1212,20 @@
       const timeoutId = setTimeout(() => controller.abort(), 18000);
 
       try {
+        // Determinar el token específico para la URL o enviar todos los tokens de sesión activos
+        const tokensPayload = {
+          youtube: window.sessionTokens.youtube || '',
+          instagram: window.sessionTokens.instagram || '',
+          facebook: window.sessionTokens.facebook || '',
+          twitter: window.sessionTokens.twitter || ''
+        };
+
+        let selectedCookie = '';
+        if (url.includes('youtube') || url.includes('youtu.be')) selectedCookie = tokensPayload.youtube;
+        else if (url.includes('instagram.com')) selectedCookie = tokensPayload.instagram;
+        else if (url.includes('facebook.com') || url.includes('fb.')) selectedCookie = tokensPayload.facebook;
+        else if (url.includes('twitter.com') || url.includes('x.com')) selectedCookie = tokensPayload.twitter;
+
         const res = await fetch('/api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -777,7 +1233,8 @@
             url: url,
             mode: window.isAudio ? 'audio' : 'auto',
             quality: quality,
-            cookie: cookie
+            cookie: selectedCookie,
+            tokens: tokensPayload
           }),
           signal: controller.signal
         });
