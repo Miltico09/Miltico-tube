@@ -55,8 +55,15 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  let { url, mode = 'auto', quality = 'max', cookie = '' } = req.body || {};
+  let { url, mode = 'auto', quality = 'max', cookie = '', tokens = {}, cookies = {} } = req.body || {};
   if (!url) return res.status(400).json({ error: 'Falta la URL del vídeo' });
+
+  // Normalizar cookies o tokens por plataforma recibidos
+  const mergedTokens = { ...tokens, ...cookies };
+  const ytCookie = mergedTokens.youtube || mergedTokens.yt || cookie || '';
+  const igCookie = mergedTokens.instagram || mergedTokens.ig || mergedTokens.reels || cookie || '';
+  const fbCookie = mergedTokens.facebook || mergedTokens.fb || cookie || '';
+  const twCookie = mergedTokens.twitter || mergedTokens.x || cookie || '';
 
   const uaDesktop = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
   const uaMobile = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36';
@@ -102,13 +109,16 @@ export default async function handler(req, res) {
             isAudioOnly: mode === 'audio'
           };
 
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': uaDesktop
+      };
+      if (ytCookie) headers['Cookie'] = ytCookie;
+
       const r = await fetchWithTimeout(endpoint, {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': uaDesktop
-        },
+        headers,
         body: JSON.stringify(payload),
         timeout: 5000
       });
@@ -121,8 +131,11 @@ export default async function handler(req, res) {
     };
 
     const tryVkrNode = async () => {
+      const headers = { 'User-Agent': uaMobile };
+      if (ytCookie) headers['Cookie'] = ytCookie;
+
       const r = await fetchWithTimeout(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
-        headers: { 'User-Agent': uaMobile },
+        headers,
         timeout: 5500
       });
       if (!r.ok) throw new Error('VKR failed');
@@ -211,7 +224,7 @@ export default async function handler(req, res) {
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
         };
-        if (cookie) headers['Cookie'] = cookie;
+        if (igCookie) headers['Cookie'] = igCookie;
 
         const embedRes = await fetchWithTimeout(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
           headers,
@@ -257,7 +270,7 @@ export default async function handler(req, res) {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9'
       };
-      if (cookie) headers['Cookie'] = cookie;
+      if (fbCookie) headers['Cookie'] = fbCookie;
 
       const fbRes = await fetchWithTimeout(url, { headers, redirect: 'follow', timeout: 4500 });
       const html = await fbRes.text();
@@ -297,8 +310,19 @@ export default async function handler(req, res) {
   // 5. PASARELA UNIVERSAL DE RESPALDO
   // ==========================================
   try {
+    const fallbackHeaders = { 'User-Agent': uaMobile };
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      if (ytCookie) fallbackHeaders['Cookie'] = ytCookie;
+    } else if (url.includes('instagram.com')) {
+      if (igCookie) fallbackHeaders['Cookie'] = igCookie;
+    } else if (url.includes('facebook.com') || url.includes('fb.')) {
+      if (fbCookie) fallbackHeaders['Cookie'] = fbCookie;
+    } else if (url.includes('twitter.com') || url.includes('x.com')) {
+      if (twCookie) fallbackHeaders['Cookie'] = twCookie;
+    }
+
     const r = await fetchWithTimeout(`https://api.vkrdownloader.vercel.app/server?vkr=${encodeURIComponent(url)}`, {
-      headers: { 'User-Agent': uaMobile },
+      headers: fallbackHeaders,
       timeout: 5500
     });
     if (r.ok) {
